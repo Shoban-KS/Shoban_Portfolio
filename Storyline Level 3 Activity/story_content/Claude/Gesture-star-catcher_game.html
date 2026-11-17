@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Star Catcher: play with your eyes or hands</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0e1030;--deep:#1a1e4c;--gold:#ffc83d;--iris:#2fd1c5;--ink:#f3f1ff;--mute:#a3a9de;--bad:#ff6b81}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:var(--night);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 16px;background:var(--deep)}
+h1{font-size:1.1rem;margin:0 auto 0 0;font-weight:700}
+label{display:flex;gap:8px;align-items:center;color:var(--mute);font-size:.9rem}
+select,button{font:inherit;color:var(--ink);background:var(--night);border:1px solid #3b4192;border-radius:8px;padding:8px 12px}
+button{cursor:pointer}
+button.primary{background:var(--gold);color:#241a00;border-color:var(--gold);font-weight:700}
+button:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--iris);outline-offset:2px}
+#stage{position:relative;flex:1;min-height:0}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#hud{position:absolute;top:12px;left:16px;font-size:1.4rem;font-weight:700;pointer-events:none}
+#hud span{color:var(--gold)}
+#overlay{position:absolute;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(14,16,48,.78)}
+#overlay.hide{display:none}
+#overlay h2{margin:0;font-size:1.8rem}
+#overlay p{margin:0;max-width:44ch;color:var(--mute);line-height:1.5}
+#cam{z-index:6;position:absolute;right:12px;bottom:12px;width:176px;border-radius:10px;overflow:hidden;background:#000;border:2px solid #3b4192}
+#cam video{display:block;width:100%;transform:scaleX(-1)}
+#cam div{position:absolute;left:0;right:0;bottom:0;padding:4px 8px;font-size:.75rem;background:rgba(0,0,0,.6)}
+#cam.hide{display:none}
+#msg{z-index:7;position:absolute;left:50%;top:14%;transform:translateX(-50%);font-size:1.6rem;font-weight:700;color:var(--gold);text-align:center;pointer-events:none}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Star Catcher</h1>
+  <label for="mode">Control with
+    <select id="mode">
+      <option value="mouse">Mouse or arrow keys</option>
+      <option value="eye">Eye movement</option>
+      <option value="hand">Hand (palm)</option>
+      <option value="fist">Fist</option>
+    </select>
+  </label>
+  <button id="calib" disabled>Calibrate eyes</button>
+  <button id="pause" disabled>Pause</button>
+  <button id="sound" aria-pressed="true">Sound: on</button>
+</header>
+
+<div id="stage">
+  <canvas id="game" aria-label="Star catching game"></canvas>
+  <div id="hud" aria-live="polite">Stars <span id="score">0</span> &nbsp; Lives <span id="lives">5</span></div>
+  <div id="msg" aria-live="assertive"></div>
+  <div id="cam" class="hide"><video id="video" playsinline muted></video><div id="status">Starting camera…</div></div>
+  <div id="overlay">
+    <h2>Catch the falling stars</h2>
+    <p>Pick a control mode above, then press Start. Camera modes ask for permission and run entirely on your device. For eye mode, calibrate first and keep your face well lit.</p>
+    <button id="start" class="primary">Start</button>
+  </div>
+</div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+const MODELS = {
+  face: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+  hand: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
+};
+
+/* ---------- input layer: every mode just writes `target` (0..1 across the screen) ---------- */
+let target = 0.5, mode = "mouse";
+let vision = null, face = null, hand = null, stream = null, lastVideoTime = -1;
+let gazeCal = { center: 0, half: 0.3 };   // raw gaze -> 0..1 mapping
+let rawGaze = 0, rawGazeSmooth = 0, calibrating = false;
+const video = $("video"), status = $("status"), cam = $("cam");
+
+function stopCamera() {
+  if (!stream) return;
+  stream.getTracks().forEach(t => t.stop());
+  stream = null; video.srcObject = null; lastVideoTime = -1;
+}
+async function ensureCamera() {
+  if (stream) return;
+  stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" }, audio: false });
+  video.srcObject = stream;
+  await video.play();
+}
+async function ensureVision() {
+  if (vision) return;
+  const m = await import(CDN + "/+esm");
+  const fileset = await m.FilesetResolver.forVisionTasks(CDN + "/wasm");
+  vision = { m, fileset };
+}
+async function makeTask(Cls, path, extra) {
+  for (const delegate of ["GPU", "CPU"]) {
+    try {
+      return await Cls.createFromOptions(vision.fileset, {
+        baseOptions: { modelAssetPath: path, delegate }, runningMode: "VIDEO", ...extra });
+    } catch (e) { if (delegate === "CPU") throw e; }
+  }
+}
+async function setMode(next) {
+  mode = next; const token = ++setMode.n;
+  $("calib").disabled = mode !== "eye";
+  if (mode === "mouse") { stopCamera(); cam.classList.add("hide"); return; }
+  cam.classList.remove("hide");
+  status.textContent = "Loading…";
+  try {
+    await ensureCamera();
+    await ensureVision();
+    if (mode === "eye" && !face) face = await makeTask(vision.m.FaceLandmarker, MODELS.face, { numFaces: 1, outputFaceBlendshapes: true });
+    if ((mode === "hand" || mode === "fist") && !hand) hand = await makeTask(vision.m.HandLandmarker, MODELS.hand, { numHands: 1 });
+    if (token !== setMode.n) return;
+    status.textContent = "Looking for you…";
+  } catch (e) {
+    if (token !== setMode.n) return;
+    console.error(e);
+    status.textContent = "Camera or model failed";
+    flash("Could not start the camera. Check permission and your internet connection.", 4000);
+    mode = "mouse"; $("mode").value = "mouse"; $("calib").disabled = true;
+  }
+}
+
+setMode.n = 0;
+
+function eyeGaze(res) {
+  const cats = res.faceBlendshapes?.[0]?.categories;
+  if (!cats) return null;
+  const s = {}; for (const c of cats) s[c.categoryName] = c.score;
+  // positive = looking toward the player's right (screen right, since the view is mirrored)
+  return ((s.eyeLookInLeft + s.eyeLookOutRight) - (s.eyeLookOutLeft + s.eyeLookInRight)) / 2;
+}
+const clamp01 = v => Math.max(0, Math.min(1, v));
+
+// A fist = at least 3 of the 4 fingers curled (fingertip closer to the wrist than its middle joint)
+function isFist(lm) {
+  const d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  let curled = 0;
+  for (const [tip, pip] of [[8, 6], [12, 10], [16, 14], [20, 18]]) if (d(lm[tip], lm[0]) < d(lm[pip], lm[0])) curled++;
+  return curled >= 3;
+}
+
+function detect() {
+  if (mode === "mouse" || !stream || video.readyState < 2 || video.currentTime === lastVideoTime) return;
+  lastVideoTime = video.currentTime;
+  const now = performance.now();
+  if (mode === "eye" && face) {
+    const g = eyeGaze(face.detectForVideo(video, now));
+    if (g === null) { status.textContent = "No face found"; return; }
+    status.textContent = "Tracking eyes";
+    rawGaze = g;
+    rawGazeSmooth += (g - rawGazeSmooth) * 0.35;
+    if (!calibrating) target = clamp01(0.5 + 0.5 * (rawGazeSmooth - gazeCal.center) / gazeCal.half);
+  } else if ((mode === "hand" || mode === "fist") && hand) {
+    const lm = hand.detectForVideo(video, now).landmarks?.[0];
+    if (!lm) { status.textContent = "No hand found"; return; }
+    if (mode === "fist") {
+      if (!isFist(lm)) { status.textContent = "Make a fist to move"; return; }   // open hand does nothing
+      status.textContent = "Fist detected";
+    } else status.textContent = "Tracking palm";
+    const x = 1 - lm[9].x;                                     // mirror to match the preview
+    target += (clamp01((x - 0.15) / 0.7) - target) * 0.5;      // use the middle 70% of the frame
+  }
+}
+
+async function calibrate() {
+  if (mode !== "eye" || !face) { flash("Choose Eye movement and wait for the camera first", 2500); return; }
+  calibrating = true;
+  const sample = async (text) => {
+    flash(text, 2600);
+    await new Promise(r => setTimeout(r, 900));       // time to move the eyes
+    const vals = [], t0 = performance.now();
+    while (performance.now() - t0 < 1500) { vals.push(rawGaze); await new Promise(r => setTimeout(r, 30)); }
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  };
+  const left = await sample("Look at the left edge of the screen");
+  const right = await sample("Now look at the right edge");
+  if (right - left > 0.04) { gazeCal = { center: (left + right) / 2, half: (right - left) / 2 }; flash("Calibrated", 1200); }
+  else flash("Eye movement too small. Try again with better light.", 3000);
+  calibrating = false;
+}
+
+/* ---------- game ---------- */
+const cv = $("game"), ctx = cv.getContext("2d");
+let W = 0, H = 0, dpr = 1;
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(resize).observe(cv);
+
+const PROFILE = {   // eye control is slower and more forgiving
+  eye:    { speed: 0.5,  gap: 1.5, reach: 1.35 },
+  hand:   { speed: 0.8,  gap: 1.2, reach: 1.15 },
+  fist:   { speed: 0.8,  gap: 1.2, reach: 1.15 },
+  mouse:  { speed: 1,    gap: 1,   reach: 1.1 }
+};
+let stars = [], score = 0, lives = 5, running = false, paused = false, spawnT = 0, blink = 0, shake = 0;
+const player = { x: 0 };
+const bgStars = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + .3 }));
+
+function flash(text, ms) {
+  const m = $("msg"); m.textContent = text;
+  clearTimeout(flash.t); flash.t = setTimeout(() => m.textContent = "", ms);
+}
+function reset() {
+  stars = []; score = 0; lives = 5; spawnT = 0; paused = false;
+  player.x = W / 2; target = 0.5;
+  $("score").textContent = 0; $("lives").textContent = 5;
+}
+function eyeR() { return Math.max(26, Math.min(52, Math.min(W, H) * 0.06)); }
+
+function drawStar(x, y, r, rot) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const a = rot + i * Math.PI / 5 - Math.PI / 2, rr = i % 2 ? r * 0.45 : r;
+    ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+  }
+  ctx.closePath(); ctx.fillStyle = "#ffc83d"; ctx.shadowColor = "#ffc83d"; ctx.shadowBlur = 14; ctx.fill(); ctx.shadowBlur = 0;
+}
+function drawEye(x, y, r) {
+  const open = 1 - 0.85 * blink;
+  let nearest = null;
+  for (const s of stars) if (!nearest || s.y > nearest.y) nearest = s;
+  let dx = 0, dy = 0;
+  if (nearest) { const a = Math.atan2(nearest.y - y, nearest.x - x); dx = Math.cos(a) * r * 0.35; dy = Math.sin(a) * r * 0.25; }
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, open);
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx, dy, r * 0.52, 0, 7); ctx.fillStyle = "#2fd1c5"; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx, dy, r * 0.25, 0, 7); ctx.fillStyle = "#0e1030"; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx - r * 0.12, dy - r * 0.14, r * 0.09, 0, 7); ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.restore();
+}
+
+function drawWand(r) {
+  ctx.rotate(0.5);
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#5b3d22"; ctx.lineWidth = r * 0.3;
+  ctx.beginPath(); ctx.moveTo(0, r * 0.95); ctx.lineTo(0, -r * 0.45); ctx.stroke();
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = r * 0.3;
+  ctx.beginPath(); ctx.moveTo(0, -r * 0.2); ctx.lineTo(0, -r * 0.45); ctx.stroke();
+  drawStar(0, -r * 0.85, r * 0.5, blink * 3);
+  ctx.fillStyle = "#fff";
+  for (const [a, d] of [[0.4, 1.1], [2.2, 1.0], [4.1, 1.2]]) {
+    ctx.beginPath(); ctx.arc(Math.cos(a) * r * d, -r * 0.85 + Math.sin(a) * r * d * 0.8, r * 0.07 * (1 + blink * 2), 0, 7); ctx.fill();
+  }
+}
+function drawPlayer(x, y, r) {
+  if (mode === "eye") { drawEye(x, y, r); return; }
+  ctx.save(); ctx.translate(x, y);
+  const pop = 1 + 0.3 * blink; ctx.scale(pop, pop);
+  if (mode === "mouse") drawWand(r);
+  else {
+    ctx.font = `${r * 2}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#fff";
+    ctx.fillText(mode === "hand" ? "\u270B" : "\u270A", 0, 0);
+  }
+  ctx.restore();
+}
+
+/* ---------- sound (synthesised, no audio files) ---------- */
+let actx = null, soundOn = true;
+function initAudio() {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {}
+}
+function tone(f, t, dur, type, vol, slideTo) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+function sfxCatch() {
+  if (!soundOn || !actx) return;
+  const t = actx.currentTime;
+  tone(880, t, 0.14, "triangle", 0.18); tone(1320, t + 0.07, 0.18, "triangle", 0.16); tone(1760, t + 0.14, 0.26, "sine", 0.1);
+}
+function sfxMiss() {
+  if (!soundOn || !actx) return;
+  tone(260, actx.currentTime, 0.28, "sawtooth", 0.07, 110);
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  detect();
+  ctx.clearRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#0e1030"); g.addColorStop(1, "#23296b");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "#cfd3ff";
+  for (const b of bgStars) { ctx.globalAlpha = 0.25 + b.r / 3; ctx.beginPath(); ctx.arc(b.x * W, b.y * H, b.r, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+
+  const r = eyeR(), py = H - r - 24;
+  player.x += (target * W - player.x) * Math.min(1, dt * 14);
+  player.x = Math.max(r, Math.min(W - r, player.x));
+
+  if (running && !paused) {
+    const level = 1 + score / 12, P = PROFILE[mode];
+    spawnT -= dt;
+    if (spawnT <= 0) { stars.push({ x: 30 + Math.random() * (W - 60), y: -20, v: (110 + Math.random() * 60) * Math.min(level, 3), r: 14 + Math.random() * 6, rot: 0 }); spawnT = Math.max(0.35, 1.1 - score * 0.02) * P.gap; }
+    for (const s of stars) { s.y += s.v * dt * P.speed; s.rot += dt * 2; }
+    stars = stars.filter(s => {
+      if (Math.abs(s.x - player.x) < r * P.reach + s.r * 0.6 && Math.abs(s.y - py) < r * P.reach) { score++; blink = 1; $("score").textContent = score; sfxCatch(); return false; }
+      if (s.y > H + 20) { lives--; shake = 1; $("lives").textContent = lives; sfxMiss(); return false; }
+      return true;
+    });
+    if (lives <= 0) endGame();
+  }
+  blink = Math.max(0, blink - dt * 5); shake = Math.max(0, shake - dt * 3);
+  ctx.save(); if (shake) ctx.translate((Math.random() - .5) * 8 * shake, 0);
+  for (const s of stars) drawStar(s.x, s.y, s.r, s.rot);
+  ctx.restore();
+  drawPlayer(player.x, py, r);
+  requestAnimationFrame(frame);
+}
+
+function endGame() {
+  running = false; $("pause").disabled = true;
+  $("overlay").querySelector("h2").textContent = `You caught ${score} stars`;
+  $("overlay").querySelector("p").textContent = "Switch control mode if you like, then play again.";
+  $("start").textContent = "Play again";
+  $("overlay").classList.remove("hide");
+}
+
+/* ---------- wiring ---------- */
+$("mode").addEventListener("change", e => setMode(e.target.value));
+$("calib").addEventListener("click", calibrate);
+$("pause").addEventListener("click", () => { paused = !paused; $("pause").textContent = paused ? "Resume" : "Pause"; });
+$("sound").addEventListener("click", () => {
+  soundOn = !soundOn; initAudio();
+  $("sound").textContent = "Sound: " + (soundOn ? "on" : "off"); $("sound").setAttribute("aria-pressed", soundOn);
+});
+$("start").addEventListener("click", async () => {
+  initAudio();
+  $("start").disabled = true;
+  await setMode($("mode").value);
+  $("start").disabled = false;
+  reset(); running = true; $("pause").disabled = false; $("pause").textContent = "Pause";
+  $("overlay").classList.add("hide");
+});
+cv.addEventListener("pointermove", e => { if (mode === "mouse") target = e.offsetX / W; });
+addEventListener("keydown", e => {
+  if (mode !== "mouse") return;
+  if (e.key === "ArrowLeft") { target = clamp01(target - 0.06); e.preventDefault(); }
+  if (e.key === "ArrowRight") { target = clamp01(target + 0.06); e.preventDefault(); }
+});
+resize(); player.x = W / 2;
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

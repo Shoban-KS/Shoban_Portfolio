@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jelly Cutting Toy</title>
+<style>
+:root{--bg1:#eaf6ff;--bg2:#a9d4f5;--ink:#12304a;--btn:rgba(255,255,255,.85);--on:#d8102a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 45%,var(--bg1),var(--bg2));font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+canvas{position:fixed;inset:0;touch-action:none;display:block}
+#hint{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;font-size:14px;opacity:.75;pointer-events:none;padding:0 12px}
+#ui{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:6}
+#ui button{font:600 14px system-ui,sans-serif;color:var(--ink);background:var(--btn);border:2px solid transparent;border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+#ui button[aria-pressed="true"]{border-color:var(--on);color:var(--on)}
+#knife{position:fixed;left:0;top:0;pointer-events:none;z-index:5;display:none;will-change:transform}
+#knife svg{display:block;width:60px;height:210px;margin:-208px 0 0 -30px;transform-origin:30px 208px;transform:rotate(-24deg);filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
+#knife.chop svg{animation:chop .28s ease-out}
+@keyframes chop{0%{transform:rotate(-24deg)}35%{transform:rotate(6deg) translateY(14px)}100%{transform:rotate(-24deg)}}
+</style></head><body>
+<div id="hint"></div>
+<div id="knife"><svg viewBox="0 0 60 210"><defs><linearGradient id="bl" x1="0" x2="1"><stop offset="0" stop-color="#f4f6f8"/><stop offset=".5" stop-color="#b9c1c9"/><stop offset="1" stop-color="#eef1f4"/></linearGradient></defs><path d="M16 62H44V178Q44 196 30 208Q16 196 16 178Z" fill="url(#bl)" stroke="#8a929a"/><rect x="18" y="0" width="24" height="66" rx="8" fill="#4a2a1c"/><circle cx="30" cy="16" r="2.5" fill="#d9c9a8"/><circle cx="30" cy="46" r="2.5" fill="#d9c9a8"/></svg></div>
+<div id="ui"><button id="bK" aria-pressed="true">🔪 Knife</button><button id="bH" aria-pressed="false">✋ Hand</button><button id="bR">↺ Reset</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(()=>{
+const SEG=10,H=1.15,RT=.85,RB=1.6,NT=10,NS=18,NU=NT+NS,TAU=Math.PI*2;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.NoToneMapping;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const cvs=renderer.domElement;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(40,1,.1,100);
+
+// environment for glossy reflections
+const ec=document.createElement('canvas');ec.width=512;ec.height=256;const g=ec.getContext('2d');
+const gr=g.createLinearGradient(0,0,0,256);gr.addColorStop(0,'#fff');gr.addColorStop(.5,'#c9b8b4');gr.addColorStop(1,'#5a4046');
+g.fillStyle=gr;g.fillRect(0,0,512,256);g.fillStyle='#fff';g.fillRect(60,40,90,50);g.fillRect(300,30,120,60);g.fillRect(200,100,40,30);
+const envTex=new THREE.CanvasTexture(ec);envTex.mapping=THREE.EquirectangularReflectionMapping;envTex.encoding=THREE.sRGBEncoding;
+scene.environment=new THREE.PMREMGenerator(renderer).fromEquirectangular(envTex).texture;
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x665058,.35));
+const sun=new THREE.DirectionalLight(0xffffff,1.1);sun.position.set(3,7,4);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-7,right:7,top:7,bottom:-7,near:1,far:20});sun.shadow.bias=-.0005;scene.add(sun);
+const glow=new THREE.PointLight(0xff2030,.9,5);glow.position.set(0,.6,0);scene.add(glow);
+
+const plate=new THREE.Mesh(new THREE.CylinderGeometry(2.3,2.1,.08,72),new THREE.MeshStandardMaterial({color:0xf4efe9,roughness:.35}));
+plate.position.y=-.04;plate.receiveShadow=true;scene.add(plate);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.ShadowMaterial({opacity:.22}));
+floor.rotation.x=-Math.PI/2;floor.position.y=-.081;floor.receiveShadow=true;scene.add(floor);
+
+const mat=new THREE.MeshPhysicalMaterial({color:0xc4000f,roughness:.12,clearcoat:.6,clearcoatRoughness:.08,transparent:true,opacity:.95,emissive:0x5a0000,side:THREE.DoubleSide,envMapIntensity:.55});
+
+// ---- jelly geometry (fluted mold, one wedge per flute) ----
+function prof(j){ if(j<=NT){const s=j/NT;return[RT*s,H,0];} const t=(j-NT)/NS;return[RT+(RB-RT)*(.5*t+.5*t*t*t),H*(1-t),t]; }
+function mod(th,t){return 1-.09*(.35+.65*t)*(.5+.5*Math.cos(SEG*th));}
+function makeWedge(k){
+  const t0=k*TAU/SEG,t1=(k+1)*TAU/SEG,NA=14,pos=[],idx=[],W=NU+1;
+  for(let i=0;i<=NA;i++){const th=t0+(t1-t0)*i/NA;for(let j=0;j<=NU;j++){const q=prof(j),r=q[0]*mod(th,q[2]);pos.push(r*Math.cos(th),q[1],r*Math.sin(th));}}
+  for(let i=0;i<NA;i++)for(let j=0;j<NU;j++){const a=i*W+j,b=(i+1)*W+j,c=a+1,d=b+1;idx.push(a,b,c,b,d,c);}
+  [t0,t1].forEach((e,side)=>{
+    const base=pos.length/3,NV=4,M=NS+1;
+    for(let v=0;v<=NV;v++)for(let m=0;m<=NS;m++){const q=prof(NT+m),r=v/NV*q[0]*mod(e,q[2]);pos.push(r*Math.cos(e),q[1],r*Math.sin(e));}
+    for(let v=0;v<NV;v++)for(let m=0;m<NS;m++){const a=base+v*M+m,b=base+(v+1)*M+m,c=a+1,d=b+1;
+      if(side===0)idx.push(a,b,c,b,d,c);else idx.push(a,c,b,b,c,d);}
+  });
+  const mid=(t0+t1)/2,cx=.55*RB*Math.cos(mid),cz=.55*RB*Math.sin(mid);
+  for(let i=0;i<pos.length;i+=3){pos[i]-=cx;pos[i+2]-=cz;}
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(pos),3));geo.setIndex(idx);geo.computeVertexNormals();
+  geo.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.6,0),2.4);
+  const mesh=new THREE.Mesh(geo,mat);mesh.castShadow=true;mesh.frustumCulled=false;scene.add(mesh);
+  const V=()=>new THREE.Vector3();
+  const p={mesh,geo,orig:new Float32Array(pos),home:new THREE.Vector3(cx,0,cz),pos:new THREE.Vector3(cx,0,cz),vel:V(),prevVel:V(),
+    jA:V(),jvA:V(),jB:V(),jvB:V(),free:false,held:false,dirty:true,tx:0,tz:0,gx:0,gz:0};
+  mesh.userData.p=p;mesh.position.copy(p.pos);return p;
+}
+let pieces=[];
+for(let k=0;k<SEG;k++)pieces.push(makeWedge(k));
+
+// ---- soft-body wobble ----
+const dv=new THREE.Vector3();let B={x0:-3,x1:3,z0:-2,z1:3};
+function spring(j,jv,k,c,gain,dt){
+  jv.x-=dv.x*gain;jv.z-=dv.z*gain;jv.y-=dv.y*gain*.7;
+  jv.x+=(-j.x*k-jv.x*c)*dt;jv.y+=(-j.y*k-jv.y*c)*dt;jv.z+=(-j.z*k-jv.z*c)*dt;
+  j.addScaledVector(jv,dt);j.x=clamp(j.x,-.55,.55);j.y=clamp(j.y,-.55,.55);j.z=clamp(j.z,-.55,.55);
+}
+function step(p,dt,tm){
+  if(p.held){
+    p.vel.x+=((p.tx-p.pos.x)*300-p.vel.x*26)*dt;p.vel.z+=((p.tz-p.pos.z)*300-p.vel.z*26)*dt;
+    p.vel.y+=((.4-p.pos.y)*200-p.vel.y*20)*dt;
+  }else if(p.free){const f=Math.exp(-2.4*dt);p.vel.x*=f;p.vel.z*=f;p.vel.y-=16*dt;}
+  if(p.free){
+    p.pos.addScaledVector(p.vel,dt);
+    if(p.pos.y<0){p.pos.y=0;p.vel.y=p.vel.y<-.5?-p.vel.y*.25:0;}
+    if(p.pos.x<B.x0){p.pos.x=B.x0;p.vel.x*=-.5}if(p.pos.x>B.x1){p.pos.x=B.x1;p.vel.x*=-.5}
+    if(p.pos.z<B.z0){p.pos.z=B.z0;p.vel.z*=-.5}if(p.pos.z>B.z1){p.pos.z=B.z1;p.vel.z*=-.5}
+    p.mesh.position.copy(p.pos);
+  }
+  dv.copy(p.vel).sub(p.prevVel);p.prevVel.copy(p.vel);
+  if(dv.length()>6)dv.setLength(6);
+  spring(p.jA,p.jvA,220,7,.45,dt);spring(p.jB,p.jvB,70,2.6,.6,dt);
+  const e=p.jA.length()+p.jB.length()+p.jvA.length()*.1+p.jvB.length()*.1;
+  if(e>.004||p.dirty){deform(p,tm);p.dirty=false;}
+}
+function deform(p,tm){
+  const o=p.orig,a=p.geo.attributes.position.array,n=o.length;
+  const sx=p.jA.x+p.jB.x,sz=p.jA.z+p.jB.z,sq=clamp((p.jA.y+p.jB.y)*.5,-.3,.3);
+  const en=Math.min(1,(Math.abs(p.jvA.x)+Math.abs(p.jvA.z)+Math.abs(p.jvB.x)+Math.abs(p.jvB.z))*.15);
+  for(let i=0;i<n;i+=3){
+    const x=o[i],y=o[i+1],z=o[i+2],w=Math.pow(y/H,1.4),rip=Math.sin(tm*20+y*7+x*3)*.025*en*w;
+    a[i]=x*(1-sq*.5)+sx*w+rip;a[i+1]=y*(1+sq);a[i+2]=z*(1-sq*.5)+sz*w+rip*.7;
+  }
+  p.geo.attributes.position.needsUpdate=true;p.geo.computeVertexNormals();
+}
+function poke(list,amt){list.forEach(p=>{p.jvB.x+=(Math.random()-.5)*3*amt;p.jvB.z+=(Math.random()-.5)*3*amt;p.jvB.y-=1.5*amt;});}
+
+// ---- input ----
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+const knife=document.getElementById('knife'),hint=document.getElementById('hint'),bK=document.getElementById('bK'),bH=document.getElementById('bH');
+let mode='knife',drag=null;
+function ground(x,y,out){ray.setFromCamera({x,y},camera);return ray.ray.intersectPlane(plane,out);}
+function pick(list){ray.setFromCamera(ndc,camera);const h=ray.intersectObjects(list.map(p=>p.mesh),false);return h.length?h[0].object.userData.p:null;}
+function setMode(m){
+  mode=m;bK.setAttribute('aria-pressed',m==='knife');bH.setAttribute('aria-pressed',m==='hand');
+  cvs.style.cursor=m==='knife'?'none':'grab';knife.style.display=m==='knife'&&seen?'block':'none';
+  hint.textContent=m==='knife'?'Knife mode: click a slice of the jelly to cut it free':'Hand mode: drag a cut slice around — poke the jelly to make it wobble';
+}
+let seen=false;
+function place(e){ndc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);knife.style.transform=`translate(${e.clientX}px,${e.clientY}px)`;
+  if(!seen){seen=true;if(mode==='knife')knife.style.display='block';}}
+cvs.addEventListener('pointermove',e=>{
+  place(e);
+  if(drag){const h=ground(ndc.x,ndc.y,new THREE.Vector3());if(h){drag.tx=clamp(h.x+drag.gx,B.x0,B.x1);drag.tz=clamp(h.z+drag.gz,B.z0,B.z1);}}
+});
+cvs.addEventListener('pointerleave',()=>{if(!drag){seen=false;knife.style.display='none';}});
+cvs.addEventListener('pointerdown',e=>{
+  place(e);
+  if(mode==='knife'){
+    knife.classList.remove('chop');void knife.offsetWidth;knife.classList.add('chop');
+    const p=pick(pieces.filter(q=>!q.free));
+    if(p){
+      p.free=true;const d=new THREE.Vector3(p.pos.x,0,p.pos.z).normalize();
+      p.vel.set(d.x*1.6,2.2,d.z*1.6);p.jvB.set((Math.random()-.5)*2,-1,(Math.random()-.5)*2);
+      poke(pieces.filter(q=>!q.free),.5);
+    }
+  }else{
+    const f=pick(pieces.filter(q=>q.free));
+    if(f){
+      const h=ground(ndc.x,ndc.y,new THREE.Vector3());drag=f;f.held=true;f.gx=f.pos.x-h.x;f.gz=f.pos.z-h.z;f.tx=f.pos.x;f.tz=f.pos.z;
+      cvs.setPointerCapture(e.pointerId);cvs.style.cursor='grabbing';
+    }else if(pick(pieces.filter(q=>!q.free)))poke(pieces.filter(q=>!q.free),1);
+  }
+});
+function release(){if(drag){drag.held=false;drag=null;cvs.style.cursor='grab';}}
+cvs.addEventListener('pointerup',release);cvs.addEventListener('pointercancel',release);
+bK.onclick=()=>setMode('knife');bH.onclick=()=>setMode('hand');
+document.getElementById('bR').onclick=()=>{release();pieces.forEach(p=>{p.free=false;p.held=false;p.pos.copy(p.home);p.mesh.position.copy(p.pos);
+  [p.vel,p.prevVel,p.jA,p.jvA,p.jB,p.jvB].forEach(v=>v.set(0,0,0));p.dirty=true;});setMode('knife');};
+addEventListener('keydown',e=>{if(e.key==='k'||e.key==='K')setMode('knife');if(e.key==='h'||e.key==='H')setMode('hand');});
+
+function resize(){
+  const w=innerWidth,h=innerHeight,asp=w/h,d=8*Math.max(1,Math.min(2.2,1.45/asp));
+  renderer.setSize(w,h);camera.aspect=asp;camera.position.set(0,d*.55,d*.83);camera.lookAt(0,.3,0);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+  const q=(x,y)=>ground(x,y,new THREE.Vector3()),tl=q(-.9,.7),tr=q(.9,.7),bl=q(-.9,-.6),br=q(.9,-.6);
+  B={x0:Math.max(tl.x,bl.x)+.75,x1:Math.min(tr.x,br.x)-.75,z0:tl.z+.6,z1:bl.z-.6};
+  if(B.x0>=B.x1){B.x0=-.5;B.x1=.5;}
+}
+addEventListener('resize',resize);resize();setMode('knife');
+
+let last=performance.now();
+(function loop(now){requestAnimationFrame(loop);const dt=Math.min(.033,(now-last)/1000||.016);last=now;
+  pieces.forEach(p=>step(p,dt,now/1000));renderer.render(scene,camera);})(last);
+})();
+</script></body></html>

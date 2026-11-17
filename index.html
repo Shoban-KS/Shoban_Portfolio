@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>K S Shoban | Senior eLearning Developer & Accessibility Specialist</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05060f;--fg:#eef0ff;--mut:#a9aecb;--card:rgba(14,16,36,.72);--line:rgba(140,150,255,.25);--a:#8b6cff;--b:#22d3ee;--w:#ff9f45;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 17px/1.6 "Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+main,header,footer{position:relative;z-index:1}
+.skip{position:absolute;left:-999px;top:8px;background:var(--w);color:#000;padding:8px 14px;border-radius:8px;z-index:9}
+.skip:focus{left:8px}
+a{color:var(--b)}
+:focus-visible{outline:3px solid var(--w);outline-offset:3px}
+nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:5;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:10px;background:linear-gradient(var(--bg),transparent)}
+nav a{color:var(--fg);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:99px;border:1px solid transparent}
+nav a:hover{border-color:var(--line);background:var(--card)}
+section{min-height:100vh;padding:110px 6vw 60px;display:flex;flex-direction:column;justify-content:center;max-width:1100px;margin:0 auto}
+#hero{align-items:flex-start}
+.kick{color:var(--w);letter-spacing:.2em;text-transform:uppercase;font-size:13px;margin:0 0 10px}
+h1{font-size:clamp(44px,9vw,104px);line-height:1;margin:0 0 18px;background:linear-gradient(100deg,#fff,var(--b) 55%,var(--a));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:clamp(28px,4.5vw,46px);margin:0 0 28px}
+.kick,.lead,h2{text-shadow:0 2px 16px var(--bg),0 0 6px var(--bg)}
+.lead{max-width:640px;color:var(--mut);font-size:19px}
+.btn{display:inline-block;margin:24px 12px 0 0;padding:12px 22px;border-radius:99px;background:var(--a);color:#fff;text-decoration:none;font-weight:700}
+.btn.o{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-top:26px}
+.stat b{display:block;font-size:44px;color:var(--w);line-height:1.1}
+.stat span{color:var(--mut);font-size:15px}
+.tl{list-style:none;margin:0;padding:0;display:grid;gap:14px;border-left:2px solid var(--line);padding-left:22px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-30px;top:26px;width:12px;height:12px;border-radius:50%;background:var(--b);box-shadow:0 0 14px var(--b)}
+.tl h3{margin:0;font-size:19px}
+.tl .d{color:var(--w);font-size:14px}
+.tl p{margin:4px 0 0;color:var(--mut);font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;list-style:none}
+.chips li{padding:8px 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:15px;transition:transform .2s,border-color .2s}
+.chips li:hover{transform:translateY(-4px) scale(1.05);border-color:var(--b)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.grid h3{margin:0 0 6px;color:var(--b);font-size:17px}
+.grid p{margin:0;color:var(--mut);font-size:15px}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+.rv.on{opacity:1;transform:none}
+footer{text-align:center;padding:40px 6vw 60px;color:var(--mut);font-size:14px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#about">Skip to content</a>
+<canvas id="gl" aria-hidden="true"></canvas>
+<nav aria-label="Primary"><a href="#hero">Home</a><a href="#about">About</a><a href="#exp">Journey</a><a href="Storyline%20Level%203%20Activity/story.html" target="_blank" rel="noopener" aria-label="Portfolio (opens in a new tab)">Portfolio</a><a href="#skills">Skills</a><a href="#edu">Credentials</a><a href="#contact">Contact</a></nav>
+<header>
+<section id="hero">
+<p class="kick">Bengaluru, India</p>
+<h1>K S Shoban</h1>
+<p class="lead">Senior eLearning Developer &amp; Accessibility Specialist. Twenty years turning complex training into gamified, inclusive, SCORM-ready experiences for global enterprises.</p>
+<div><a class="btn" href="#exp">Fly through my journey</a><a class="btn o" href="#contact">Get in touch</a></div>
+<p style="color:var(--mut);font-size:14px;margin-top:28px">Move your mouse to look around. Scroll to travel.</p>
+</section>
+</header>
+<main>
+<section id="about">
+<h2 class="rv">About</h2>
+<div class="card rv"><p style="margin:0">Learning technology professional with 20+ years across digital learning engineering, multimedia and enterprise training delivery. I design interactive, gamified courses that meet <b>WCAG</b> and <b>Section 508</b> standards, and ship them as SCORM-compliant packages for LMS deployment. Clients include Amway, HP, ANZ Bank, Shell, Pfizer and Samsung, across banking, telecom, healthcare and technology.</p></div>
+<div class="stats">
+<div class="card stat rv"><b data-n="20">0</b><span>+ years in digital learning</span></div>
+<div class="card stat rv"><b data-n="1000">0</b><span>+ legacy courses migrated to responsive</span></div>
+<div class="card stat rv"><b data-n="13">0</b><span>languages in one localization program</span></div>
+<div class="card stat rv"><b data-n="10">0</b><span>person team led</span></div>
+</div>
+</section>
+<section id="exp">
+<h2 class="rv">Journey</h2>
+<ol class="tl" id="tl"></ol>
+</section>
+<section id="skills">
+<h2 class="rv">Toolkit</h2>
+<ul class="chips rv" id="chips"></ul>
+<div class="grid" style="margin-top:28px">
+<div class="card rv"><h3>Accessibility</h3><p>Section 508 and WCAG-aligned design for screen reader, low-vision and hearing-impaired learners.</p></div>
+<div class="card rv"><h3>Gamified interactions</h3><p>JavaScript-enabled simulations and scenarios in Storyline that reinforce retention.</p></div>
+<div class="card rv"><h3>Localization</h3><p>Arabic, French, Spanish, Portuguese and German builds that preserve course structure.</p></div>
+<div class="card rv"><h3>AI-assisted production</h3><p>ChatGPT, Google Gemini and Copilot to speed up development cycles.</p></div>
+</div>
+</section>
+<section id="edu">
+<h2 class="rv">Credentials</h2>
+<div class="grid">
+<div class="card rv"><h3>Certifications</h3><p>Accessible eLearning in Articulate 360 (2026)<br>PRINCE2 Foundation (2021)<br>Lean Six Sigma Yellow Belt (2019)<br>Lean Six Sigma White Belt (2019)</p></div>
+<div class="card rv"><h3>Education</h3><p>B.Com, Bangalore Open University (2012)<br>Advanced Course in Multimedia, Arena Multimedia (2005)<br>Diploma in Multimedia (2004)</p></div>
+<div class="card rv"><h3>Languages</h3><p>English, Kannada, Hindi, Telugu, Tamil</p></div>
+</div>
+</section>
+<section id="contact">
+<h2 class="rv">Let's build something accessible</h2>
+<div class="card rv"><p style="margin:0 0 6px">Email: <a href="mailto:shoban212005@gmail.com">shoban212005@gmail.com</a></p><p style="margin:0">LinkedIn: <a href="https://www.linkedin.com/in/shobanks/" rel="noopener">linkedin.com/in/shobanks</a></p></div>
+</section>
+</main>
+<footer>&copy; K S Shoban. Built with Three.js.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var JOBS=[
+["Jul 2024 – Nov 2026","Senior eLearning Developer, ELB Learning","Accessible Storyline modules, gamified JavaScript interactions, multilingual SCORM delivery, AI-assisted workflows."],
+["Jun 2019 – Jul 2024","eLearning Developer, Odborne Learning (Xpert Learning)","Immersive Storyline and Captivate training for multinationals; vendor coordination and QA."],
+["Feb 2012 – Apr 2019","Senior Consultant / Content Developer / Courseware Engineer, IBM India","Shell, Pfizer, KeyBank, ANZ Bank. Migrated 1000+ Lectora courses to Gomo; 13-language localization."],
+["Apr 2009 – Jun 2010 | Aug 2011 – Jan 2012","Team Leader, Procyon Infotech Pvt. Ltd.","Led a 10-member team producing digital learning for multi-client projects."],
+["Jul 2010 – Jul 2011","Flash Programmer, Wipro Limited (via Ask Technologies)","Weekly CBT/WBT modules, XML-driven course structures, SCORM templates."],
+["Aug 2007 – Jan 2009","Product Integrator, Edutech Dimensions","Integrated learning components from POC to Gold; SCORM, AICC and accessibility checks."],
+["Jul 2005 – Aug 2007","Junior ActionScript Developer, Theorem India","Flash ads for AOL, Yahoo and MSN. Where it all began."]];
+var SK=["Articulate Storyline","Articulate Rise","Adobe Captivate","Animate CC","Photoshop","Gomo","Vyond","Animaker","SCORM","LMS","Instructional Design","Section 508","WCAG","Gamified eLearning","Google Gemini","ChatGPT","Copilot"];
+var tl=document.getElementById("tl");
+JOBS.forEach(function(j){var li=document.createElement("li");li.className="card rv";li.innerHTML='<div class="d">'+j[0]+'</div><h3>'+j[1]+'</h3><p>'+j[2]+'</p>';tl.appendChild(li)});
+var ch=document.getElementById("chips");
+SK.forEach(function(s){var li=document.createElement("li");li.textContent=s;ch.appendChild(li)});
+
+var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("on");var n=e.target.querySelector("[data-n]");if(n&&!n.d){n.d=1;var t=+n.dataset.n,s=0;var iv=setInterval(function(){s+=Math.ceil(t/40);if(s>=t){s=t;clearInterval(iv)}n.textContent=s},30)}}})},{threshold:.15});
+document.querySelectorAll(".rv").forEach(function(e){io.observe(e)});
+
+try{
+var cv=document.getElementById("gl");
+var R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));
+var S=new THREE.Scene();S.fog=new THREE.FogExp2(0x05060f,.028);
+var C=new THREE.PerspectiveCamera(60,1,.1,200);
+var hero=new THREE.Group();hero.position.set(4,0,-8);S.add(hero);
+var knot=new THREE.Mesh(new THREE.TorusKnotGeometry(1.1,.3,120,14),new THREE.MeshBasicMaterial({color:0x8b6cff,wireframe:true,transparent:true,opacity:.2}));
+var ico=new THREE.Mesh(new THREE.IcosahedronGeometry(.55,1),new THREE.MeshBasicMaterial({color:0x22d3ee,wireframe:true,transparent:true,opacity:.2}));
+hero.add(knot,ico);
+var rings=[];
+for(var i=0;i<8;i++){
+ var r=new THREE.Mesh(new THREE.TorusGeometry(3.2,.05,12,80),new THREE.MeshBasicMaterial({color:i%2?0x22d3ee:0xff9f45,transparent:true,opacity:.6}));
+ r.position.set(Math.sin(i*1.3)*1.5,Math.cos(i*1.1)*1,-22-i*5.5);S.add(r);rings.push(r);
+ var c=new THREE.Mesh(new THREE.OctahedronGeometry(.6),new THREE.MeshBasicMaterial({color:0x8b6cff,wireframe:true}));
+ c.position.set(r.position.x+ (i%2?-1:1)*5,r.position.y+1.5,r.position.z);S.add(c);rings.push(c);
+}
+var N=1600,pos=new Float32Array(N*3);
+for(i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*50;pos[i*3+1]=(Math.random()-.5)*30;pos[i*3+2]=8-Math.random()*90}
+var pg=new THREE.BufferGeometry();pg.setAttribute("position",new THREE.BufferAttribute(pos,3));
+S.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xbfc6ff,size:.07,transparent:true,opacity:.8})));
+var mx=0,my=0,prog=0,cur=0,t=0;
+function size(){R.setSize(innerWidth,innerHeight,false);C.aspect=innerWidth/innerHeight;C.updateProjectionMatrix();var m=innerWidth<700;hero.position.x=m?C.aspect*3.4:C.aspect*5.4;hero.position.y=m?5.2:4.2;draw()}
+function scroll(){var h=document.documentElement.scrollHeight-innerHeight;prog=h>0?scrollY/h:0;if(reduce)draw()}
+function draw(){
+ if(reduce)cur=prog;
+ C.position.set(mx*1.2,-my*.8,5-cur*62);C.lookAt(mx*.6,-my*.4,C.position.z-10);
+ knot.rotation.set(t*.3,t*.5,0);ico.rotation.set(-t*.4,t*.3,0);
+ hero.scale.setScalar(Math.max(.01,1-cur*3));
+ rings.forEach(function(o,k){o.rotation.z=t*(k%2?.3:-.3);o.rotation.x=k%4===1?t*.4:0});
+ R.render(S,C)}
+addEventListener("resize",size);addEventListener("scroll",scroll,{passive:true});
+addEventListener("pointermove",function(e){mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(reduce)draw()});
+function loop(){t+=.012;cur+=(prog-cur)*.06;draw();requestAnimationFrame(loop)}
+size();scroll();if(!reduce)loop();
+}catch(e){document.getElementById("gl").style.display="none"}
+</script>
+</body>
+</html>

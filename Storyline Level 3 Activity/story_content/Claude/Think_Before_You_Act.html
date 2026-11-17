@@ -1,0 +1,158 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Think Before You Act — L3 Visual Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#172B4D;--slate:#405A7A;--teal:#00A6A6;--bg:#F5F7FA;--ink:#1F2933;--mute:#52606D;--ok:#2E8540;--warn:#D9822B;--err:#C9372C;--lb:#dfe5ee}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--lb:#05080f}}
+:root[data-theme=dark]{--lb:#05080f}
+html,body{margin:0;height:100%;background:var(--lb);font-family:Inter,system-ui,sans-serif}
+#wrap{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;background:var(--bg);overflow:hidden;color:var(--ink)}
+#bg{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#top{position:absolute;left:0;right:0;top:0;height:72px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 64px;color:#fff;z-index:8}
+#top b{font-size:20px;letter-spacing:.06em}#top span{font-size:15px;color:#9fb3cc}
+.scr{position:absolute;inset:0;display:none}.scr.on{display:block}
+.hd2{position:absolute;left:64px;top:100px}
+h1{font-size:44px;font-weight:700;margin:0}h2{font-size:30px;font-weight:600;margin:0 0 8px}h3{font-size:22px;font-weight:600;margin:0}
+p{font-size:17px;line-height:1.5;margin:0}.cap{font-size:15px;color:var(--mute)}
+.card{background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(23,43,77,.16);position:absolute}
+.btn{font:600 16px Inter;background:var(--teal);color:#fff;border:0;border-radius:10px;padding:16px 36px;cursor:pointer;transition:.2s;box-shadow:0 4px 12px rgba(0,166,166,.35)}
+.btn:hover{background:#008c8c;transform:translateY(-2px)}.btn:disabled{background:#9aa5b1;box-shadow:none;cursor:default;transform:none}
+.chip{display:inline-block;background:var(--bg);border-radius:10px;padding:10px 16px;font-size:15px;margin:0 5px}
+.dk{background:rgba(23,43,77,.86)}.dk h2,.dk p,.dk h3{color:#fff}.dk .cap{color:#c9d3e0}
+#nav{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:9}
+#nav button{width:40px;height:40px;border-radius:50%;border:2px solid var(--slate);background:#fff;font:600 15px Inter;color:var(--slate);cursor:pointer}
+#nav button.a{background:var(--teal);border-color:var(--teal);color:#fff}
+.nd circle{fill:#fff;stroke:#405A7A;stroke-width:4;transition:.3s}.nd text{fill:#172B4D;transition:.3s}.nd:hover circle{stroke:#00A6A6}
+.nd.a circle{fill:#00A6A6;stroke:#00A6A6}.nd.a text{fill:#fff}
+#pn{right:64px;top:190px;width:640px;height:700px;padding:44px;box-sizing:border-box}
+#pn li{font-size:17px;line-height:1.5;margin:12px 0;list-style:none}#pn li:before{content:"✓ ";color:var(--ok);font-weight:700}
+.mc{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);border-radius:16px;padding:28px;text-align:left;color:#fff;font-family:Inter;cursor:pointer;position:relative;width:424px;height:250px;transition:.2s;margin-right:32px;vertical-align:top}
+.mc:hover{transform:translateY(-6px)}.mc.w{background:rgba(217,130,43,.22);border-color:var(--warn)}.mc.s{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,166,166,.4)}
+.mc .v{font-size:56px;font-weight:700;margin:14px 0 6px}.mc small{font-size:20px;font-weight:600;margin-left:8px;opacity:.8}.mc .cap{color:#c9d3e0}
+.al{position:absolute;right:24px;top:20px;font-size:28px;color:var(--warn)}
+#fl{position:absolute;left:64px;top:190px;width:1075px;height:760px;border-radius:16px;background:linear-gradient(#2d4468,#172B4D);overflow:hidden}
+#fl .bt{position:absolute;left:0;right:0;top:520px;height:48px;background:repeating-linear-gradient(90deg,#405A7A 0 40px,#34496a 40px 80px);animation:mv 2s linear infinite}
+@keyframes mv{to{background-position:80px 0}}
+.ch{position:absolute;top:250px;width:150px;background:none;border:0;cursor:pointer;color:#fff;font:600 16px Inter;text-align:center}
+.hdd{width:64px;height:64px;border-radius:50%;margin:0 auto -6px;background:#e8c9a8;position:relative}
+.bd{height:150px;border-radius:50px 50px 12px 12px;margin:0 20px 10px}
+.ch:before{content:"";position:absolute;left:-6px;right:-6px;top:-14px;bottom:26px;border:3px solid var(--teal);border-radius:24px;animation:pl 1.6s infinite}
+@keyframes pl{0%{opacity:.9;transform:scale(.96)}100%{opacity:0;transform:scale(1.12)}}.ch.d:before{display:none}.ch.d span{color:#7be0a0}
+#lg{left:1171px;top:190px;width:685px;height:760px;padding:32px;box-sizing:border-box}
+.li{border-left:5px solid var(--teal);background:var(--bg);border-radius:10px;padding:14px 18px;margin-top:14px;font-size:17px;line-height:1.5}
+.dc{width:560px;height:580px;position:absolute;top:210px;padding:40px;box-sizing:border-box;cursor:pointer;border:3px solid transparent;transition:.2s;text-align:left;font-family:Inter;background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(23,43,77,.16)}
+.dc:hover{border-color:var(--teal)}.dc .n{width:56px;height:56px;border-radius:50%;background:var(--navy);color:#fff;font:700 24px Inter;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.dc h3{line-height:1.4}.gz{position:absolute;left:0;right:0;bottom:24px;text-align:center;opacity:0}
+.br{height:44px;border-radius:8px;width:0;color:#fff;font-weight:600;font-size:15px;line-height:44px;padding-left:14px;box-sizing:border-box;white-space:nowrap;overflow:hidden}
+.sl{width:100%;accent-color:#00A6A6;margin:8px 0 26px}
+#hm{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}#hm i{height:76px;border-radius:8px;transition:background .3s}
+.bdg{display:inline-block;background:var(--bg);border-radius:12px;padding:14px 20px;font-weight:600;font-size:16px;margin:0 10px 10px 0}
+textarea{width:100%;height:220px;border:2px solid #cbd2d9;border-radius:12px;padding:16px;font:17px/1.5 Inter;box-sizing:border-box;margin:16px 0 24px;resize:none}textarea:focus{outline:3px solid rgba(0,166,166,.4);border-color:var(--teal)}
+</style></head><body><div id="wrap"><div id="stage">
+<canvas id="bg" width="1920" height="1080"></canvas>
+<div id="top"><b>THINK BEFORE YOU ACT</b><span>Observe · Assess · Decide · Act · Learn</span></div>
+<section class="scr on" id="s1"><div class="card in" style="left:560px;top:170px;width:800px;padding:52px;box-sizing:border-box;text-align:center">
+<h1>THINK BEFORE YOU ACT</h1><h3 style="color:var(--slate);margin:8px 0 4px">Shift Supervisor Simulator</h3><p class="cap">Real-time operational risk management.</p>
+<p style="margin:26px 0">“It’s 2:30 PM. Your line is behind schedule, and a critical delivery deadline is approaching. Are you ready?”</p>
+<div style="margin-bottom:34px"><span class="chip">Line 4</span><span class="chip">45 mins behind</span><span class="chip">Shipment due: end of day</span></div>
+<button class="btn" id="enter">Enter Shift</button></div></section>
+<section class="scr" id="s2"><div class="hd2 in"><h2>The Operational Decision Loop</h2><p>Select each stage to review your operational protocol.</p></div>
+<svg id="lp" class="in" viewBox="0 0 760 760" style="position:absolute;left:230px;top:190px;width:780px;height:780px"></svg><div id="pn" class="card"></div></section>
+<section class="scr dk" id="s3" style="background:rgba(23,43,77,.84)"><div class="hd2 in"><h2>Live Telemetry — Line 4</h2><p>Select a metric to compare it with standard operating limits.</p></div>
+<div id="mcs" style="position:absolute;left:64px;top:210px;white-space:nowrap"></div>
+<div id="ch" class="card in" style="left:64px;top:490px;width:1792px;height:440px;background:rgba(255,255,255,.07);box-shadow:none;padding:28px;box-sizing:border-box"><h3 id="cht">Historical trend</h3><svg id="tr" viewBox="0 0 1792 340" style="width:100%;height:340px"></svg></div></section>
+<section class="scr" id="s4"><div class="hd2 in"><h2>2:30 PM — Situation Analysis</h2><span class="chip" style="background:var(--warn);color:#fff;font-weight:600;margin:0">Line Status: 45 Mins Behind | Shipment Due: End of Day</span></div>
+<div id="fl" class="in"><div class="bt"></div></div><div id="lg" class="card in"><h3>Log card</h3><p class="cap" id="lgh">Select a team member to hear their view.</p><div id="lgl"></div></div></section>
+<section class="scr" id="s5"><div class="hd2 in"><h2>Select Your Course of Action</h2><p>Hover a card to preview its risk, then select your choice.</p></div></section>
+<section class="scr" id="s6" style="background:rgba(23,43,77,.6)"><div class="card in" style="left:360px;top:130px;width:1200px;height:800px;padding:48px;box-sizing:border-box">
+<p class="cap">Operational Outcome</p><h2 id="ob" style="font-size:32px">Line Halted — Shipment Delayed, Equipment Saved.</h2>
+<div id="ind" style="margin:24px 0;opacity:0"></div>
+<div id="bars" style="opacity:0"><p class="cap">Short-term Delay</p><div class="br" id="b1" style="background:var(--warn)"></div><p class="cap" style="margin-top:18px">Long-term Failure Risk</p><div class="br" id="b2" style="background:var(--err)"></div></div>
+<div style="position:absolute;left:48px;bottom:44px"><button class="btn" id="rv">Review Analysis</button> <button class="btn" id="nx6" style="display:none">Continue to challenge</button></div></div></section>
+<section class="scr dk" id="s7" style="background:rgba(23,43,77,.84)"><div class="hd2 in"><h2>Operational Balance Matrix</h2><p>Balance Line Speed vs. Equipment Strain.</p></div>
+<div class="card in" style="left:64px;top:200px;width:500px;height:700px;padding:40px;box-sizing:border-box;background:rgba(255,255,255,.07);box-shadow:none">
+<h3>Line factors</h3><p style="margin-top:26px" id="l0"></p><input class="sl" type="range" min="0" max="100" value="60" id="r0"><p id="l1"></p><input class="sl" type="range" min="0" max="100" value="40" id="r1"><p id="l2"></p><input class="sl" type="range" min="0" max="100" value="60" id="r2"><p class="cap" id="out"></p></div>
+<div class="card in" style="left:596px;top:200px;width:760px;height:700px;padding:40px;box-sizing:border-box;background:rgba(255,255,255,.07);box-shadow:none"><h3 style="margin-bottom:24px">Machine strain heatmap</h3><div id="hm"></div></div>
+<div class="card in" style="left:1388px;top:200px;width:468px;height:700px;padding:40px;box-sizing:border-box;background:rgba(255,255,255,.07);box-shadow:none"><h3>Risk Score Meter</h3><div id="rs" style="font-size:96px;font-weight:700;margin:30px 0 6px">49</div><p id="st"></p>
+<div style="position:relative;height:30px;background:rgba(255,255,255,.15);border-radius:15px;margin-top:40px"><div id="mb" style="height:30px;border-radius:15px;width:49%"></div><div style="position:absolute;left:40%;top:-10px;height:50px;border-left:3px dashed #fff"></div></div><p class="cap" style="margin-top:12px">Target threshold: 40</p></div></section>
+<section class="scr" id="s8"><div class="hd2 in"><h2>Shift Debrief &amp; Action Plan</h2></div>
+<div class="card in" style="left:64px;top:170px;width:700px;height:760px;padding:44px;box-sizing:border-box;text-align:center"><svg viewBox="0 0 220 220" width="240" height="240"><circle cx="110" cy="110" r="90" fill="none" stroke="#e4e9f0" stroke-width="16"/><circle id="sc" cx="110" cy="110" r="90" fill="none" stroke="#00A6A6" stroke-width="16" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="565.5" transform="rotate(-90 110 110)"/><text id="sn" x="110" y="124" text-anchor="middle" font-size="44" font-weight="700" fill="#172B4D">0%</text></svg>
+<h3 style="margin:16px 0 28px">Performance Score: 85% Risk Alignment</h3><span class="bdg">🔎 Sharp Observer</span><span class="bdg">⚖ Risk Aligned</span><span class="bdg">🛑 Safe Call</span></div>
+<div class="card in" style="left:796px;top:170px;width:1060px;height:760px;padding:56px;box-sizing:border-box"><h3>What signal will you pay closer attention to during your next shift?</h3><textarea id="ta" aria-label="Your reflection"></textarea><button class="btn" id="cm">Commit to Action &amp; Complete</button><p id="done" class="cap" style="margin-top:18px"></p></div></section>
+<div id="nav"></div></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let cur=0,choice=0,camera=null;const look={x:0,y:2,z:0},H={v:.3};let spin=.4;
+const cam=[[0,6,16,0,2,0],[-10,5,14,0,2,-2],[8,4,12,0,2,-3],[-6,3,10,2,1,0],[0,8,14,0,1,-4],[10,6,10,0,2,-3],[0,3,9,0,1.5,-6],[0,12,18,0,0,-2]],op=[1,.15,1,.3,.2,.3,1,.12],hv=[.2,.2,.65,.6,.6,.35,.5,.1];
+function fit(){const w=$('#wrap'),s=Math.min(w.clientWidth/1920,w.clientHeight/1080);$('#stage').style.transform=`translate(-50%,-50%) scale(${s})`}
+addEventListener('resize',fit);fit();
+/* Three.js background: conveyor, crates, gears; camera + hot gear driven by GSAP */
+try{const R=new THREE.WebGLRenderer({canvas:$('#bg'),antialias:true});R.setSize(1920,1080,false);
+const sc=new THREE.Scene();sc.background=new THREE.Color(0x172B4D);sc.fog=new THREE.Fog(0x172B4D,18,50);
+camera=new THREE.PerspectiveCamera(50,16/9,.1,100);camera.position.set(0,6,16);camera.lookAt(0,2,0);
+sc.add(new THREE.AmbientLight(0xffffff,.6));const dl=new THREE.DirectionalLight(0xffffff,.8);dl.position.set(5,12,8);sc.add(dl);
+const pl=new THREE.PointLight(0x00A6A6,1.2,30);pl.position.set(0,5,2);sc.add(pl);sc.add(new THREE.GridHelper(80,80,0x405A7A,0x24385a));
+const M=c=>new THREE.MeshStandardMaterial({color:c,roughness:.6,metalness:.2}),B=(w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);sc.add(m);return m};
+B(44,.5,3,0x405A7A,0,.25,0);const cr=[];for(let i=0;i<16;i++)cr.push(B(1.2,1.2,1.2,i%3?0x00A6A6:0xF5F7FA,-20+i*2.6,1.1,0));
+[[-12,-9,4,7],[-4,-10,3,5],[5,-9,4,8],[13,-10,3,6]].forEach(([x,z,w,h])=>B(w,h,w,0x2d4468,x,h/2,z));
+const g=[[-6,2.2,12,0x6b86a8],[-2.5,1.4,12,0x6b86a8],[3,2.6,10,0x2E8540]].map(([x,r,n,c])=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,.8,n),M(c));m.rotation.x=Math.PI/2;m.position.set(x,r+.6,-5);sc.add(m);return m});
+const hot=g[2],cg=new THREE.Color(0x2E8540),cr2=new THREE.Color(0xC9372C);let last=0;
+(function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000||0,.05);last=t;
+g.forEach((m,i)=>m.rotation.y+=dt*spin*(i%2?-1.4:1));cr.forEach(c=>{c.position.x+=dt*(.8+spin*2);if(c.position.x>22)c.position.x=-22;c.rotation.y+=dt*.2});
+hot.material.color.copy(cg).lerp(cr2,H.v);hot.material.emissive.copy(hot.material.color).multiplyScalar(.2+.5*H.v*(.6+.4*Math.sin(t/200)));R.render(sc,camera)})(0)}catch(e){}
+const init={};
+function go(n){if(n===cur)return;const a=$$('.scr'),o=a[cur],x=a[n];cur=n;$$('#nav button').forEach((b,i)=>b.classList.toggle('a',i==n));
+gsap.to(o,{opacity:0,duration:.25,onComplete(){o.classList.remove('on');x.classList.add('on');gsap.set(x,{opacity:1});gsap.from(x.querySelectorAll('.in'),{y:28,opacity:0,duration:.5,stagger:.07,clearProps:'transform,opacity'});init[n]&&init[n]()}});
+const c=cam[n];if(camera){gsap.to(camera.position,{x:c[0],y:c[1],z:c[2],duration:1.6,ease:'power2.inOut'});gsap.to(look,{x:c[3],y:c[4],z:c[5],duration:1.6,ease:'power2.inOut',onUpdate:()=>camera.lookAt(look.x,look.y,look.z)})}
+gsap.to('#bg',{opacity:op[n],duration:1});gsap.to(H,{v:hv[n],duration:1.2})}
+for(let i=0;i<8;i++){const b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label','Screen '+(i+1));b.onclick=()=>go(i);$('#nav').append(b)}$('#nav button').classList.add('a');
+$('#enter').onclick=()=>go(1);gsap.from('#s1 .in',{y:30,opacity:0,duration:.7});
+/* S2 loop diagram */
+const N=['OBSERVE','ASSESS','DECIDE','ACT','LEARN'],C=2*Math.PI*270,
+D=[['Notice signals before an alarm does.',['Scan gauges, sounds and smells','Ask operators what feels different','Note changes from the baseline']],['Compare readings with operating limits.',['Check each value against its normal range','Look at combinations, not single readings','Weigh severity and trend']],['Choose with the risk in view.',['List your realistic options','Preview the risk of each one','Pick the safest viable path']],['Execute with control.',['Tell the team what you decided','Follow the protocol step by step','Confirm the result']],['Close the loop.',['Record what happened','Compare outcome with expectation','Share the insight with your team']]];
+let h=`<circle cx="380" cy="380" r="270" fill="none" stroke="#cbd5e1" stroke-width="8" stroke-dasharray="4 14"/><circle id="pr" cx="380" cy="380" r="270" fill="none" stroke="#00A6A6" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" transform="rotate(-90 380 380)"/><text x="380" y="376" text-anchor="middle" font-size="26" font-weight="600" fill="#405A7A">Decision</text><text x="380" y="408" text-anchor="middle" font-size="26" font-weight="600" fill="#405A7A">Loop</text>`;
+N.forEach((t,i)=>{const a=(-90+72*i)*Math.PI/180,x=380+270*Math.cos(a),y=380+270*Math.sin(a);h+=`<g class="nd" data-i="${i}" tabindex="0" role="button" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="64"/><text x="${x}" y="${y-4}" text-anchor="middle" font-size="26" font-weight="700">${i+1}</text><text x="${x}" y="${y+24}" text-anchor="middle" font-size="16" font-weight="600">${t}</text></g>`});
+$('#lp').innerHTML=h;gsap.set('#pn',{x:760});let first=true;
+$$('.nd').forEach(n=>{const f=()=>{const i=+n.dataset.i;$$('.nd').forEach(e=>e.classList.remove('a'));n.classList.add('a');
+gsap.to('#pr',{strokeDashoffset:C*(1-(i+1)/5),duration:.9,ease:'power2.out'});
+$('#pn').innerHTML=`<p class="cap">Stage ${i+1} of 5</p><h2 style="color:var(--teal);font-size:32px">${N[i]}</h2><p><b>Core rule:</b> ${D[i][0]}</p><h3 style="margin-top:28px">Protocol checklist</h3><ul style="padding:0">${D[i][1].map(l=>`<li>${l}</li>`).join('')}</ul>`;
+if(first){gsap.to('#pn',{x:0,duration:.6,ease:'power3.out'});first=false}else gsap.fromTo('#pn li',{x:30,opacity:0},{x:0,opacity:1,stagger:.1,duration:.4})};n.onclick=f;n.onkeydown=e=>e.key=='Enter'&&f()});
+/* S3 telemetry */
+const T=[{n:'Temperature',v:82,u:'°C',lo:65,hi:75},{n:'Vibration',v:5.8,u:'mm/s',lo:2,hi:4},{n:'Pressure',v:88,u:'PSI',lo:80,hi:90},{n:'Output Rate',v:97,u:'%',lo:95,hi:100}];
+$('#mcs').innerHTML=T.map((d,i)=>{const w=d.v>d.hi||d.v<d.lo;return`<button class="mc in${w?' w':''}" data-i="${i}"><div class="cap">${d.n}</div><div class="v">${d.v}<small>${d.u}</small></div><div class="cap">Normal: ${d.lo}–${d.hi} ${d.u}</div>${w?'<span class="al">⚠</span>':''}</button>`}).join('');
+gsap.to('.al',{scale:1.3,repeat:-1,yoyo:true,duration:.6});
+$$('.mc').forEach(b=>b.onclick=()=>{$$('.mc').forEach(e=>e.classList.remove('s'));b.classList.add('s');const d=T[b.dataset.i],r=d.hi-d.lo,y0=Math.min(d.lo,d.v)-r*.4,y1=Math.max(d.hi,d.v)+r*.4,Y=v=>310-(v-y0)/(y1-y0)*280,X=k=>70+k*150,mid=(d.lo+d.hi)/2;
+const p=[...Array(12)].map((_,k)=>k==11?d.v:mid+(d.v-mid)*Math.pow(k/11,1.6)+Math.sin(k*1.9)*r*.07),w=d.v>d.hi||d.v<d.lo;
+$('#cht').textContent=d.n+' — last 12 readings';$('#tr').innerHTML=`<rect x="70" y="${Y(d.hi)}" width="1650" height="${Y(d.lo)-Y(d.hi)}" fill="#2E8540" opacity=".25"/><text x="80" y="${Y(d.hi)+22}" fill="#9be3b0" font-size="15">Normal band ${d.lo}–${d.hi} ${d.u}</text><polyline id="pl" fill="none" stroke="${w?'#D9822B':'#00A6A6'}" stroke-width="5" stroke-linejoin="round" points="${p.map((v,k)=>X(k)+','+Y(v)).join(' ')}"/>`;
+const l=$('#pl').getTotalLength();gsap.fromTo('#pl',{strokeDasharray:l,strokeDashoffset:l},{strokeDashoffset:0,duration:1.2,ease:'power2.out'})});
+/* S4 hotspots */
+const P=[['Operator','We’ve seen these readings before six months ago. It ran fine.','#00A6A6',130],['Manager','Can we keep pushing? We can’t miss today’s shipment.','#D9822B',470],['Maintenance','Investigate combinations of elevated temp and vibration immediately.','#F5F7FA',810]];let heard=0;
+P.forEach(([n,q,c,x])=>{const b=document.createElement('button');b.className='ch';b.style.left=x+'px';b.innerHTML=`<div class="hdd"></div><div class="bd" style="background:${c}"></div><span>${n}</span>`;
+b.onclick=()=>{if(b.classList.contains('d'))return;b.classList.add('d');if(!heard++)$('#lgh').remove();const d=document.createElement('div');d.className='li';d.innerHTML=`<b style="color:var(--teal)">${n}</b><br>“${q}”`;$('#lgl').append(d);gsap.from(d,{x:60,opacity:0,duration:.5});
+if(heard==3){const k=document.createElement('button');k.className='btn';k.style.marginTop='28px';k.textContent='Make your call';k.onclick=()=>go(4);$('#lgl').append(k);gsap.from(k,{opacity:0,y:20})}};$('#fl').append(b)});
+/* S5 decision cards */
+const K=[['Halt the line immediately and request full maintenance diagnostics.',-60,'Low'],['Continue full production while requesting an urgent maintenance check.',60,'High'],['Reduce line speed by 15% to stabilize temperature and complete shipment.',0,'Medium']];
+const pt=(a,r=100)=>[120+r*Math.cos(a*Math.PI/180),120-r*Math.sin(a*Math.PI/180)],arc=(a,b,c)=>{const s=pt(a),e=pt(b);return`<path d="M${s} A100 100 0 0 1 ${e}" fill="none" stroke="${c}" stroke-width="22"/>`};
+K.forEach(([t,a,l],i)=>{const d=document.createElement('button');d.className='dc in';d.style.left=64+i*616+'px';d.innerHTML=`<div class="n">${i+1}</div><h3>${t}</h3><div class="gz"><svg viewBox="0 0 240 150" width="260"><g>${arc(180,120,'#2E8540')}${arc(120,60,'#D9822B')}${arc(60,0,'#C9372C')}</g><line class="nl" x1="120" y1="120" x2="120" y2="38" stroke="#172B4D" stroke-width="6" stroke-linecap="round"/><circle cx="120" cy="120" r="9" fill="#172B4D"/></svg><p style="font-weight:600;margin-top:-4px">Risk: ${l}</p></div>`;
+const gz=d.querySelector('.gz'),nl=d.querySelector('.nl');
+d.onmouseenter=d.onfocus=()=>{gsap.to(d,{y:-12,duration:.25});gsap.to(gz,{opacity:1,duration:.3});gsap.fromTo(nl,{rotation:-90,svgOrigin:'120 120'},{rotation:a,svgOrigin:'120 120',duration:.9,ease:'elastic.out(1,.5)'})};
+d.onmouseleave=d.onblur=()=>{gsap.to(d,{y:0,duration:.25});gsap.to(gz,{opacity:0,duration:.2})};d.onclick=()=>{choice=i;go(5)};$('#s5').append(d)});
+/* S6 outcome */
+const O=[['Line Halted — Shipment Delayed, Equipment Saved.',['Safety: High','Schedule: -45 mins','Asset Risk: Mitigated'],55,8],['Full Speed — Shipment Made, Failure Risk Critical.',['Safety: Low','Schedule: On time','Asset Risk: High'],5,92],['Speed Reduced — Shipment Late, Strain Contained.',['Safety: Medium','Schedule: -20 mins','Asset Risk: Moderate'],30,45]];
+init[5]=()=>{const o=O[choice];$('#ob').textContent=o[0];$('#ind').innerHTML=o[1].map(t=>`<span class="chip" style="font-weight:600;font-size:17px">${t}</span>`).join('');gsap.set('#ind,#bars',{opacity:0});gsap.set('.br',{width:0});$('#rv').style.display='';$('#nx6').style.display='none'};
+$('#rv').onclick=()=>{const o=O[choice];$('#rv').style.display='none';gsap.to('#ind,#bars',{opacity:1,duration:.4});gsap.to('#b1',{width:o[2]/100*1000+60,duration:1.2,ease:'power3.out'});gsap.to('#b2',{width:o[3]/100*1000+60,duration:1.2,delay:.2,ease:'power3.out'});$('#b1').textContent=o[2]+'%';$('#b2').textContent=o[3]+'%';$('#nx6').style.display='';gsap.from('#nx6',{opacity:0,delay:1.2})};
+$('#nx6').onclick=()=>go(6);
+/* S7 balance matrix */
+const hm=$('#hm');for(let i=0;i<60;i++)hm.append(document.createElement('i'));
+function upd(){const s=+$('#r0').value,c=+$('#r1').value,l=+$('#r2').value,r=Math.max(0,Math.min(100,.45*s+.35*l-.35*c+15));
+$('#l0').textContent='Speed: '+s+'%';$('#l1').textContent='Cooling: '+c+'%';$('#l2').textContent='Load: '+l+'%';$('#out').textContent='Estimated output: '+Math.round(40+.6*s)+'%';
+$('#rs').textContent=Math.round(r);$('#st').textContent=r<=40?'In the green zone — safe to push output.':r<=65?'Caution — strain is building.':'Critical — reduce speed or load.';
+const col=r<=40?'#2E8540':r<=65?'#D9822B':'#C9372C';$('#mb').style.cssText+=`;width:${r}%;background:${col}`;
+$$('#hm i').forEach((e,k)=>{const x=k%10,y=(k/10)|0,v=r+(x/9-.5)*30+Math.sin(x*1.7+y*2.3)*12;e.style.background=v<40?'#2E8540':v<65?'#D9822B':'#C9372C'});
+gsap.killTweensOf(H);H.v=r/100;spin=.2+s/60}
+['r0','r1','r2'].forEach(i=>$('#'+i).oninput=upd);upd();init[6]=upd;
+init[7]=()=>{gsap.to('#sc',{strokeDashoffset:565.5*.15,duration:1.6,ease:'power2.out'});const o={v:0};gsap.to(o,{v:85,duration:1.6,ease:'power2.out',onUpdate:()=>$('#sn').textContent=Math.round(o.v)+'%'})};
+$('#cm').onclick=()=>{if(!$('#ta').value.trim()){gsap.fromTo('#ta',{x:-8},{x:0,duration:.5,ease:'elastic.out(1,.3)'});$('#done').textContent='Write one signal first.';return}$('#cm').disabled=true;$('#done').textContent='Action committed. Shift report ready (simulated).';gsap.from('#done',{opacity:0,y:10})};
+</script></body></html>
