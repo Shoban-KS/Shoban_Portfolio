@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Think Before You Click: Phishing Email Prototype</title>
+<style>
+:root{--orange:#FF4800;--black:#000C19;--fuchsia:#FF0064;--indigo:#5300DF;--fire:#FFAF00;--frost:#00B4DC;--bg:#F4F4F4;--line:#C8CACC;--gray:#49515B;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--black);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0) 12px env(safe-area-inset-bottom,0)}
+.stage{position:relative;width:min(100%,calc((100vh - 24px)*16/9));aspect-ratio:16/9;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px var(--line);container-type:inline-size}
+.screen{position:absolute;inset:0;display:none;padding:4cqw 5cqw;flex-direction:column}
+.screen.on{display:flex;animation:in .5s ease both}
+@keyframes in{from{opacity:0;transform:translateY(1.5cqw)}to{opacity:1;transform:none}}
+h1{font-size:5.2cqw;line-height:1.05;margin:0 0 1.2cqw;letter-spacing:-.02em}
+h2{font-size:2.8cqw;margin:0 0 1cqw}
+p{font-size:1.6cqw;line-height:1.5;margin:0 0 1cqw;max-width:62ch}
+.btn{font:inherit;font-weight:700;font-size:1.6cqw;border:0;border-radius:99px;padding:1cqw 2.6cqw;background:var(--orange);color:#fff;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 1cqw 2cqw rgba(255,72,0,.35)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--black);box-shadow:inset 0 0 0 2px var(--black)}
+.btn.ghost:hover{background:var(--black);color:#fff;box-shadow:none}
+:focus-visible{outline:3px solid var(--indigo);outline-offset:3px}
+.logo{font-weight:900;font-size:2.4cqw;letter-spacing:.04em;display:flex;align-items:center;gap:.8cqw}
+.logo i{width:3.2cqw;height:3.2cqw;border-radius:.8cqw;background:var(--orange);display:inline-block}
+.foot{position:absolute;left:0;right:0;bottom:1.2cqw;text-align:center;font-size:1.1cqw;color:var(--gray)}
+canvas#bg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.screen>*{position:relative;z-index:1}
+.land{justify-content:center}
+.land .tag{display:inline-block;background:var(--black);color:#fff;border-radius:99px;padding:.4cqw 1.4cqw;font-size:1.3cqw;width:max-content;margin-bottom:1.5cqw}
+.land h1 span{color:var(--orange)}
+/* intro */
+.pres{display:flex;gap:4cqw;align-items:center;flex:1}
+.avatar{width:22cqw;height:22cqw;flex:none;background:var(--bg);border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line)}
+.mouth{transform-origin:50% 50%}
+.talk .mouth{animation:talk .28s infinite alternate}
+@keyframes talk{to{transform:scaleY(.25)}}
+.cap{background:var(--black);color:#fff;border-radius:1.2cqw;padding:1.6cqw 2cqw;font-size:1.9cqw;line-height:1.4;min-height:11cqw;flex:1}
+.bar{height:.7cqw;background:var(--line);border-radius:9px;overflow:hidden;margin:1.5cqw 0}
+.bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--orange),var(--fuchsia))}
+.row{display:flex;gap:1.5cqw;align-items:center}
+/* mail */
+.mail{flex:1;display:flex;gap:2.5cqw;min-height:0}
+.inbox{flex:1.7;border:1px solid var(--line);border-radius:1.2cqw;overflow:hidden;display:flex;flex-direction:column}
+.mh{background:var(--bg);padding:1cqw 1.6cqw;font-size:1.25cqw;border-bottom:1px solid var(--line);line-height:1.6}
+.mb{padding:1.4cqw 1.6cqw;font-size:1.4cqw;line-height:1.55}
+.hot{border-bottom:2px dotted var(--indigo);cursor:help;position:relative}
+.hot:hover::after,.hot:focus::after{content:attr(data-tip);position:absolute;left:0;top:130%;background:var(--indigo);color:#fff;padding:.6cqw 1cqw;border-radius:.7cqw;font-size:1.15cqw;width:24cqw;z-index:5;line-height:1.35}
+.fakebtn{display:inline-block;background:var(--frost);color:#fff;font-weight:700;padding:.7cqw 1.6cqw;border-radius:.6cqw;margin:.6cqw 0}
+.side{flex:1;display:flex;flex-direction:column;gap:1cqw}
+.opt{font:inherit;text-align:left;background:#fff;border:2px solid var(--line);border-radius:1.2cqw;padding:1.1cqw 1.4cqw;font-size:1.45cqw;font-weight:600;cursor:pointer;transition:all .2s;display:flex;gap:1cqw;align-items:center}
+.opt:hover{border-color:var(--orange);transform:translateX(.6cqw);background:#FFF6F2}
+.opt em{font-style:normal;width:2.4cqw;height:2.4cqw;border-radius:50%;background:var(--black);color:#fff;display:grid;place-items:center;font-size:1.2cqw;flex:none}
+.hint{font-size:1.15cqw;color:var(--gray)}
+.fb{border-radius:1.2cqw;padding:1.6cqw 2cqw;color:#fff;margin-bottom:1.5cqw}
+.fb.bad{background:var(--fuchsia)}.fb.mid{background:var(--fire);color:var(--black)}.fb.good{background:var(--indigo)}
+.fb h2{color:inherit}.fb p{margin:0;font-size:1.6cqw}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4cqw;margin:1cqw 0 2cqw}
+.step{background:var(--bg);border-radius:1.2cqw;padding:1.6cqw;border-top:.5cqw solid var(--orange);transition:transform .25s}
+.step:hover{transform:translateY(-.6cqw)}
+.step:nth-child(2){border-color:var(--indigo)}.step:nth-child(3){border-color:var(--fuchsia)}.step:nth-child(4){border-color:var(--frost)}
+.step b{font-size:2.2cqw;display:block;margin-bottom:.5cqw}.step span{font-size:1.3cqw;line-height:1.4;display:block}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<section class="screen land on" id="s-land" aria-label="Landing">
+  <div class="logo"><i></i>ELB</div>
+  <div style="margin-top:4cqw">
+    <span class="tag">Security awareness · 5 minutes</span>
+    <h1>Think before<br>you <span>click.</span></h1>
+    <p>A password-expiry email has just landed in your inbox. Decide what to do and see what happens next.</p>
+    <button class="btn" id="start">Start</button>
+  </div>
+  <div class="foot">© ELB Learning. All rights reserved. Prototype for review.</div>
+</section>
+
+<section class="screen" id="s-intro" aria-label="Introduction video">
+  <h2>Welcome from your security coach</h2>
+  <div class="pres">
+    <div class="avatar" id="avatar" aria-hidden="true">
+      <svg viewBox="0 0 120 120" width="80%" height="80%">
+        <circle cx="60" cy="52" r="30" fill="#FFD9C4"/>
+        <path d="M30 48c0-22 16-30 30-30s30 8 30 30c-8-10-16-14-30-14S38 38 30 48z" fill="#000C19"/>
+        <circle cx="49" cy="52" r="3.2" fill="#000C19"/><circle cx="71" cy="52" r="3.2" fill="#000C19"/>
+        <ellipse class="mouth" cx="60" cy="68" rx="7" ry="5" fill="#FF0064"/>
+        <path d="M22 118c2-24 18-32 38-32s36 8 38 32z" fill="#FF4800"/>
+        <rect x="44" y="92" width="32" height="5" rx="2.5" fill="#fff" opacity=".9"/>
+      </svg>
+    </div>
+    <div class="cap" id="cap" aria-live="polite"></div>
+  </div>
+  <div class="bar" role="progressbar" aria-label="Video progress"><b id="prog"></b></div>
+  <div class="row"><button class="btn ghost" id="skip">Skip video</button><button class="btn" id="go" style="display:none">Open the inbox</button><span class="hint" id="time">0:00 / 1:00</span></div>
+</section>
+
+<section class="screen" id="s-mail" aria-label="Scenario">
+  <h2>Your inbox, Monday 9:12 am</h2>
+  <div class="mail">
+    <article class="inbox">
+      <div class="mh"><b>From:</b> <span class="hot" tabindex="0" data-tip="The domain is meridianworks-it.co, not the company's real domain.">IT Helpdesk &lt;support@meridianworks-it.co&gt;</span><br><b>To:</b> You<br><b>Subject:</b> <span class="hot" tabindex="0" data-tip="Urgent subject lines are a pressure tactic.">URGENT: Your password expires in 2 hours</span></div>
+      <div class="mb">
+        <p style="font-size:inherit">Dear user,</p>
+        <p style="font-size:inherit">Your Meridian Works password will <b>expire today</b>. Failure to update will lock your account and you will lose access to email and payroll.</p>
+        <span class="hot fakebtn" tabindex="0" data-tip="Hover shows a link to a non-company site. Never trust the button text.">Keep my password</span>
+        <p style="font-size:inherit">Thank you,<br>IT Support Team</p>
+      </div>
+    </article>
+    <aside class="side">
+      <p style="margin:0">Hover over the underlined parts for clues, then choose.</p>
+      <button class="opt" data-c="click"><em>A</em>Click the button and update my password</button>
+      <button class="opt" data-c="fwd"><em>B</em>Forward it to a colleague to ask what they think</button>
+      <button class="opt" data-c="report"><em>C</em>Report it to ELB-IT-Admin</button>
+      <span class="hint">Pick one. You can try the others afterwards.</span>
+    </aside>
+  </div>
+</section>
+
+<section class="screen" id="s-fb" aria-label="Feedback">
+  <div class="fb" id="fbbox"><h2 id="fbt"></h2><p id="fbp"></p></div>
+  <div class="row"><button class="btn ghost" id="retry">Try again</button><button class="btn" id="next">Continue</button></div>
+</section>
+
+<section class="screen" id="s-end" aria-label="Summary">
+  <h1 style="font-size:4cqw">Stop. Check. Report. Ask.</h1>
+  <p>Use these four steps whenever a message asks you to act fast.</p>
+  <div class="steps">
+    <div class="step"><b>Stop</b><span>Pause before you click or reply. Urgency is the trap.</span></div>
+    <div class="step"><b>Check</b><span>Look at the sender address, the link and the tone.</span></div>
+    <div class="step"><b>Report</b><span>Send it to ELB-IT-Admin. Do not forward it to colleagues.</span></div>
+    <div class="step"><b>Ask</b><span>Unsure? Ask IT using a channel you already trust.</span></div>
+  </div>
+  <div class="row"><button class="btn" id="again">Replay scenario</button></div>
+  <div class="foot">© ELB Learning. All rights reserved.</div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on')};
+// script for the ~1 minute narration (also shown as captions)
+const script=[
+ "Hi, I'm your security coach at ELB. Over the next few minutes, you'll handle a real-looking email.",
+ "Phishing emails copy trusted senders to steal passwords. One quick click can expose your whole team.",
+ "They usually share the same signs: urgent wording, a strange sender address and a link that asks you to log in.",
+ "You will see a password-expiry email arrive at Meridian Works. Look closely before you decide.",
+ "Choose what you would really do. Every choice has a consequence, and you can try them all.",
+ "By the end, you will use four simple steps: Stop, Check, Report and Ask. Ready? Let's begin."
+];
+let timer,t=0,total=60;
+function fmt(s){return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function playIntro(){
+  show('s-intro');t=0;$('go').style.display='none';$('skip').style.display='';
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    t+=.25;
+    const i=Math.min(script.length-1,Math.floor(t/(total/script.length)));
+    $('cap').textContent=script[i];
+    $('avatar').classList.toggle('talk',t<total);
+    $('prog').style.width=(t/total*100)+'%';
+    $('time').textContent=fmt(t)+' / 1:00';
+    if(t>=total)finishIntro();
+  },250);
+  $('cap').textContent=script[0];$('avatar').classList.add('talk');
+}
+function finishIntro(){clearInterval(timer);$('avatar').classList.remove('talk');$('prog').style.width='100%';$('go').style.display='';$('skip').style.display='none';$('go').focus()}
+$('start').onclick=playIntro;
+$('skip').onclick=()=>{clearInterval(timer);show('s-mail')};
+$('go').onclick=()=>show('s-mail');
+const out={
+ click:{c:'bad',t:'You clicked, and the page was fake.',p:'The link led to a copy of the Meridian Works login page. Your password would now be in an attacker\'s hands. Look at the sender address before you act.'},
+ fwd:{c:'mid',t:'You passed the risk to someone else.',p:'Forwarding spreads the phishing email and a colleague may click it. Report it instead of sharing it.'},
+ report:{c:'good',t:'Well done. You reported it.',p:'Sending it to ELB-IT-Admin lets IT block the sender and warn everyone. You protected the whole company.'}
+};
+let pick;
+document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+  pick=b.dataset.c;const o=out[pick];
+  $('fbbox').className='fb '+o.c;$('fbt').textContent=o.t;$('fbp').textContent=o.p;
+  $('next').textContent=pick==='report'?'Continue':'See the safe choice';
+  $('retry').style.display=pick==='report'?'none':'';
+  show('s-fb');$('next').focus();
+});
+$('retry').onclick=()=>show('s-mail');
+$('next').onclick=()=>pick==='report'?show('s-end'):show('s-mail');
+$('again').onclick=()=>show('s-mail');
+// light animated background on the landing screen (three.js-style drifting orbs, plain canvas)
+(function(){
+  const c=$('bg'),x=c.getContext('2d');let w,h;
+  const cols=['#FF4800','#FF0064','#5300DF','#FFAF00','#00B4DC'];
+  const orbs=Array.from({length:14},(_,i)=>({x:Math.random(),y:Math.random(),r:.02+Math.random()*.05,dx:(Math.random()-.5)*.0006,dy:(Math.random()-.5)*.0006,c:cols[i%5]}));
+  function size(){w=c.width=c.clientWidth*devicePixelRatio;h=c.height=c.clientHeight*devicePixelRatio}
+  size();addEventListener('resize',size);
+  const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function draw(){
+    x.clearRect(0,0,w,h);
+    const onLand=$('s-land').classList.contains('on');
+    c.style.opacity=onLand?1:.25;
+    orbs.forEach(o=>{
+      if(!calm){o.x+=o.dx*16;o.y+=o.dy*16;if(o.x<0||o.x>1)o.dx*=-1;if(o.y<0||o.y>1)o.dy*=-1}
+      x.globalAlpha=.16;x.fillStyle=o.c;x.beginPath();x.arc(o.x*w+(onLand?w*.25:0),o.y*h,o.r*w,0,7);x.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

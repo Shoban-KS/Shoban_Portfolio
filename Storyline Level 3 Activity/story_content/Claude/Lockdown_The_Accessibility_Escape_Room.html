@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lockdown: The Accessibility Escape Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@700;800&display=swap">
+<style>
+:root{--bg:#F6F1FF;--g1:#FFF1F6;--g2:#E8F1FF;--ink:#1B1440;--panel:#fff;--mut:#4A4570;--line:#CFC6F0;--acc:#5B3DF5;--on:#fff;--ok:#0F7A4F;--bad:#C0262D;--fc:#E11D74;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#150C33;--g1:#1E0F45;--g2:#0A2B3F;--ink:#F2EEFF;--panel:#221650;--mut:#BDB3EA;--line:#4A3C8A;--acc:#A99BFF;--on:#150C33;--ok:#5FE0A8;--bad:#FF9AA2;--fc:#FFD166}}
+:root[data-theme="dark"]{--bg:#150C33;--g1:#1E0F45;--g2:#0A2B3F;--ink:#F2EEFF;--panel:#221650;--mut:#BDB3EA;--line:#4A3C8A;--acc:#A99BFF;--on:#150C33;--ok:#5FE0A8;--bad:#FF9AA2;--fc:#FFD166}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg) linear-gradient(160deg,var(--g1),var(--g2)) fixed;color:var(--ink);font:1.0625rem/1.55 "Atkinson Hyperlegible",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;line-height:1.15;margin:0}
+.wrap{max-width:40rem;margin:0 auto;padding:1rem}
+h1{font-size:2.4rem;font-weight:800;color:var(--acc)}
+.brand{margin:.25rem 0;color:var(--mut)}.top{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap}
+#pips{display:flex;justify-content:space-between;gap:.5rem;list-style:none;padding:0;margin:1rem 0}
+#pips li{display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1}
+#pips svg{width:3.4rem;height:auto;overflow:visible;transition:filter .3s,transform .3s}
+.n{font-weight:700;font-size:.85rem;color:var(--mut)}
+.dw{fill:#2B1E5C;stroke:var(--ink);stroke-width:2;transition:fill .6s}
+.lg{transform-origin:6px 0;transition:transform .8s cubic-bezier(.3,1.4,.5,1)}
+.lg .leaf{fill:var(--dc);stroke:var(--ink);stroke-width:2}
+.lg .pn{fill:none;stroke:rgba(255,255,255,.6);stroke-width:2}
+.lg .hd{fill:#FFD166;stroke:var(--ink)}
+.lk{transition:opacity .25s}.lk rect{fill:#FFD166;stroke:var(--ink);stroke-width:1.5}.lk path{stroke:var(--ink);stroke-width:2.5}
+li.done .lg{transform:scaleX(.2)}li.done .dw{fill:#FFE08A}li.done .lk{opacity:0}
+li.now svg{filter:drop-shadow(0 0 7px var(--dc));transform:translateY(-3px)}
+li:not(.done):not(.now) svg{filter:grayscale(.55) opacity(.75)}
+#snd{min-height:2.75rem;font-size:.95rem}
+.v{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#stage{background:color-mix(in srgb,var(--rc,var(--acc)) 7%,var(--panel));border:2px solid var(--line);border-top:10px solid var(--rc,var(--acc));border-radius:12px;padding:1.25rem;transition:border-color .4s}
+h2{font-size:1.7rem;font-weight:700}
+.story{margin:.6rem 0 1rem}
+fieldset{border:0;border-top:3px solid var(--rc,var(--line));margin:1rem 0 0;padding:.75rem 0 0}
+legend{font-weight:700;padding:0 .5rem 0 0;max-width:100%}
+.opt{display:flex;gap:.6rem;align-items:flex-start;border:2px solid var(--line);border-radius:8px;padding:.55rem .7rem;margin:.4rem 0;cursor:pointer}
+.opt:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.opt input{margin-top:.35rem;accent-color:var(--acc)}
+.vis{width:7.5rem;color:var(--acc);display:block;margin:.5rem 0}
+.fake{display:inline-flex;border:2px solid var(--ink);border-radius:8px;padding:.35rem .55rem;margin:.5rem 0;color:var(--ink)}
+.fake svg{width:1.5rem}
+.sr{background:#0B1418;color:#9FF0C8;border-radius:8px;padding:.7rem .9rem;margin:.5rem 0;font:.95rem/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap}
+.prev{border-radius:8px;padding:1rem;font-weight:700;font-size:1.2rem;margin:.5rem 0;background:rgb(124,147,168)}
+input[type=range]{width:100%;accent-color:var(--acc);margin:.5rem 0}
+output{display:block;font-weight:700}
+.order{list-style:none;padding:0;margin:.5rem 0}
+.order li{display:flex;justify-content:space-between;align-items:center;gap:.5rem;border:2px solid var(--line);border-radius:8px;padding:.45rem .7rem;margin:.4rem 0}
+.notes{padding-left:1.2rem;color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem}
+button{font:inherit;font-weight:700;min-height:2.75rem;padding:.5rem 1rem;border-radius:8px;border:2px solid var(--acc);cursor:pointer}
+.go{background:var(--acc);color:var(--on)}.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.sm{min-height:2.75rem;min-width:2.75rem;padding:.3rem .6rem;background:transparent;color:var(--ink);border-color:var(--line);margin-left:.3rem}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--fc);outline-offset:2px}
+#live{margin-top:1rem;padding:.6rem .8rem;border-left:5px solid var(--line);min-height:2.6rem;color:var(--mut)}
+#live[data-k="true"]{border-color:var(--ok);color:var(--ok)}
+#live[data-k="false"]{border-color:var(--bad);color:var(--bad)}
+.about{border-top:2px solid var(--line);margin-top:1.2rem;padding-top:1rem}
+a{color:var(--acc);font-weight:700}
+.skip{position:absolute;left:-99rem}.skip:focus{left:1rem;top:1rem;background:var(--panel);padding:.5rem}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#stage">Skip to the game</a>
+<div class="wrap">
+<header>
+<h1>Lockdown</h1>
+<div class="top"><p class="brand">Meridian Works training portal</p><button class="ghost" id="snd" aria-pressed="true">Sound effects <span id="sv" aria-hidden="true">on</span></button></div>
+<ol id="pips" aria-label="Progress through five rooms"></ol>
+</header>
+<main>
+<section id="stage" aria-label="Game"></section>
+<div id="live" role="status" aria-live="polite"></div>
+</main>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const N=5,S={r:0,hints:0,tries:0},stage=$('#stage'),live=$('#live');
+const say=(m,k)=>{live.dataset.k=k===undefined?'':k;live.textContent=m};
+let AC=null,SND=true;
+const tone=(f,t,d,ty,v,f2)=>{if(!SND)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+t;o.type=ty||'sine';o.frequency.setValueAtTime(f,s);if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);g.gain.setValueAtTime(v||.1,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}};
+const sfx={
+ enter(){tone(160,0,.45,'sawtooth',.08,70);tone(90,.05,.3,'square',.06,50);tone(520,.4,.12,'triangle',.06)},
+ unlock(){tone(300,0,.06,'square',.08);tone(220,.09,.06,'square',.08);[523,659,784,1047].forEach((f,k)=>tone(f,.22+k*.09,.25,'triangle',.1))},
+ fail(){tone(180,0,.18,'sawtooth',.07,120)},
+ win(){[523,659,784,1047,1319].forEach((f,k)=>tone(f,k*.11,.4,'triangle',.1))}
+};
+$('#snd').onclick=e=>{SND=!SND;e.currentTarget.setAttribute('aria-pressed',SND);$('#sv').textContent=SND?'on':'off'};
+const ROOMC=['#F0506E','#F59E0B','#10B981','#3B82F6','#A855F7'];
+const DOOR=`<svg viewBox="0 0 56 84" aria-hidden="true"><path class="dw" d="M6 82V28a22 22 0 0 1 44 0v54z"/><g class="lg"><path class="leaf" d="M6 82V28a22 22 0 0 1 44 0v54z"/><path class="pn" d="M14 74V32a14 14 0 0 1 28 0v42z"/><circle class="hd" cx="42" cy="56" r="2.5"/><g class="lk"><rect x="21" y="46" width="14" height="12" rx="2"/><path d="M24 46v-5a4 4 0 0 1 8 0v5" fill="none"/></g></g></svg>`;
+function pips(){$('#pips').innerHTML=ROOMC.map((c,i)=>{const s=i<S.r?'unlocked':i===S.r?'current':'locked';return `<li class="${i<S.r?'done':i===S.r?'now':''}" style="--dc:${c}">${DOOR}<span class="n" aria-hidden="true">${i+1}</span><span class="v">Room ${i+1}: ${s}</span></li>`}).join('')}
+function draw(html){stage.innerHTML=html;pips();stage.style.setProperty('--rc',ROOMC[S.r]||'var(--ok)');const h=$('#stage h2');h.tabIndex=-1;h.focus()}
+const frame=(t,story,body)=>`<h2>${t}</h2><p class="story">${story}</p>${body}<div class="row"><button class="go" id="chk">Try the lock</button><button class="ghost" id="hint">Need a hint?</button></div>`;
+function wire(i,check,hint){
+  $('#hint').onclick=()=>{S.hints++;say('Hint: '+hint)};
+  $('#chk').onclick=()=>{S.tries++;const r=check();r===true?unlock(i):(sfx.fail(),say(r,false))};
+}
+function unlock(i){
+  const last=i===N-1;
+  say('Door unlocked.',true);const d=document.querySelectorAll('#pips li')[i];d.classList.remove('now');d.classList.add('done');d.querySelector('.v').textContent=`Room ${i+1}: unlocked`;sfx.unlock();
+  $('.row').innerHTML=`<button class="go" id="nx">${last?'Escape the building':'Open the door to room '+(i+2)}</button>`;
+  $('#nx').onclick=()=>{sfx.enter();S.r=i+1;last?end():room(S.r)};
+  $('#nx').focus();
+}
+const quiz=items=>items.map((q,n)=>`<fieldset><legend>${q.q}</legend>${q.vis||''}${q.o.map((o,k)=>`<label class="opt"><input type="radio" name="q${n}" value="${k}"><span>${o}</span></label>`).join('')}</fieldset>`).join('');
+const qcheck=items=>()=>{
+  const bad=[];
+  items.forEach((q,n)=>{const c=document.querySelector(`input[name=q${n}]:checked`);if(!c||+c.value!==q.ok)bad.push(n+1)});
+  return bad.length?`Still locked. Look again at ${bad.length>1?'items':'item'} ${bad.join(', ')}.`:true;
+};
+const lum=(r,g,b)=>[r,g,b].map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4}).reduce((a,c,i)=>a+c*[.2126,.7152,.0722][i],0);
+const BG=lum(124,147,168);
+const ratio=g=>{const t=lum(g,g,g);return (Math.max(BG,t)+.05)/(Math.min(BG,t)+.05)};
+
+const chart=`<svg class="vis" viewBox="0 0 120 60" aria-hidden="true" fill="currentColor"><rect x="10" y="36" width="20" height="20"/><rect x="36" y="26" width="20" height="30"/><rect x="62" y="16" width="20" height="40"/><rect x="88" y="4" width="20" height="52"/></svg>`;
+const wave=`<svg class="vis" viewBox="0 0 120 24" aria-hidden="true"><path d="M0 12 Q15 0 30 12 T60 12 T90 12 T120 12" fill="none" stroke="currentColor" stroke-width="3"/></svg>`;
+const mag=`<span class="fake" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M15 15l6 6" stroke="currentColor" stroke-width="2.5"/></svg></span>`;
+const sr=t=>`<pre class="sr">Screen reader says:\n${t}</pre>`;
+
+const R1=[
+ {q:'Image 1 is a bar chart in the onboarding report. Which alt text fits?',vis:chart,o:['Chart','Bar chart: course completion rises from 52% in Q1 to 88% in Q4','Colourful bars image'],ok:1},
+ {q:'Image 2 is a wave under the page title. It carries no information.',vis:wave,o:['Wave divider','Decorative blue wave','Empty alt text, so screen readers skip it'],ok:2},
+ {q:'Image 3 is an icon-only button that opens site search.',vis:mag,o:['Magnifying glass','Search','Click here'],ok:1}];
+const R4=[
+ {q:'The video says, “Press the tab key.” The auto-caption shows “Press the tap key.”',o:['Leave it, auto-captions are good enough','Correct it by hand to “tab”','Delete the caption line'],ok:1},
+ {q:'A phone rings mid-demo and the presenter reacts. The caption file is silent at that moment.',o:['Add the sound cue “[phone rings]”','Leave it, a ring is not speech','Add the word “Phone”'],ok:0},
+ {q:'Two people speak in the video and the captions run together.',o:['Colour the lines differently','Add speaker names to the lines','Nothing, viewers can guess'],ok:1}];
+const R5=[
+ {q:'A dialog has an icon-only × button.',vis:sr('  "dialog"\n  "button"'),o:['Make the × larger','Give the button an accessible name, “Close dialog”','Add a tooltip that shows on mouse hover only'],ok:1},
+ {q:'The email field has a faint grey placeholder.',vis:sr('  "edit text, blank"'),o:['Add a visible label linked to the field','Keep the placeholder, it is enough','Change the placeholder colour'],ok:0}];
+
+function room(i){
+  S.r=i;say('');
+  if(i===0){
+    draw(frame('Room 1: The silent gallery','A sign on the first door reads: every image needs the right alt text, and sometimes the right text is none at all.',quiz(R1)));
+    wire(i,qcheck(R1),'Informative images say what the picture means. Decorative ones should be skipped. Buttons need their action named.');
+  }
+  if(i===1){
+    draw(frame('Room 2: The washed-out wall','The notice on this wall is nearly invisible. Text needs a contrast ratio of at least 4.5 to 1 against its background. Slide the text shade until it passes.',
+      `<div class="prev" id="pv">Mandatory safety training closes Friday.</div><label for="sl">Text shade, light to dark</label><input type="range" id="sl" min="0" max="255" step="5" value="215" aria-describedby="rt"><output id="rt"></output>`));
+    const up=()=>{const g=+$('#sl').value,r=ratio(g);$('#pv').style.color=`rgb(${g},${g},${g})`;$('#rt').textContent=`Contrast ${r.toFixed(1)} to 1. ${r>=4.5?'Passes.':'Needs 4.5 to 1.'}`};
+    $('#sl').oninput=up;up();
+    wire(i,()=>ratio(+$('#sl').value)>=4.5||'Still locked. The contrast is below 4.5 to 1.','Darker text on this mid-blue background gives the highest contrast. Slide towards the dark end.');
+  }
+  if(i===2){
+    let ord=['Search box','Main content','Skip to main content link','Main navigation'];
+    const ans=['Skip to main content link','Main navigation','Search box','Main content'];
+    draw(frame('Room 3: The tab maze','A keyboard user presses Tab on the portal home page. Put the stops in the order they should be visited, first stop at the top.','<ol id="ol" class="order"></ol>'));
+    const paint=f=>{
+      $('#ol').innerHTML=ord.map((t,k)=>`<li><span>${t}</span><span><button class="sm" data-k="${k}" data-d="-1" aria-label="Move ${t} up" ${k?'':'disabled'}>Up</button><button class="sm" data-k="${k}" data-d="1" aria-label="Move ${t} down" ${k<3?'':'disabled'}>Down</button></span></li>`).join('');
+      if(f){const b=document.querySelector(`#ol button[data-k="${f.k}"][data-d="${f.d}"]:not([disabled])`)||document.querySelector(`#ol button[data-k="${f.k}"]:not([disabled])`);if(b)b.focus()}
+    };
+    paint();
+    $('#ol').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=+b.dataset.k,d=+b.dataset.d,n=k+d;[ord[k],ord[n]]=[ord[n],ord[k]];paint({k:n,d});say(`${ord[n]} is now number ${n+1} of 4.`)};
+    wire(i,()=>ord.every((t,k)=>t===ans[k])||'Still locked. That is not the order a keyboard user should meet the page.','Let people jump past repeated content first. Then navigation, then tools, then the main content.');
+  }
+  if(i===3){
+    draw(frame('Room 4: The mute screening room','A training video is playing without sound. Fix the captions so every learner gets the full picture.',quiz(R4)));
+    wire(i,qcheck(R4),'Good captions are accurate, include meaningful sounds, and say who is speaking.');
+  }
+  if(i===4){
+    draw(frame('Room 5: The listening room','The last door only opens if you can hear what a blind learner hears. Read the screen reader output, then fix each problem.',quiz(R5)));
+    wire(i,qcheck(R5),'A screen reader needs a name for every control. Placeholders disappear and are not reliable labels.');
+  }
+}
+function intro(){
+  S.r=0;S.hints=0;S.tries=0;say('');
+  draw(`<h2>Five rooms. Five barriers. One exit.</h2><p class="story">You’re an accessibility auditor at Meridian Works. The training portal has sealed itself, and each lock is a real barrier that learners meet every day. Fix it to open the door.</p><ul class="notes"><li>There is no timer, because timed content is a barrier too.</li><li>Play with the keyboard alone: Tab, Space and the arrow keys.</li><li>Hints are free, but they show on your badge.</li></ul><div class="row"><button class="go" id="st">Enter room 1</button></div>`);
+  $('#st').onclick=()=>{sfx.enter();room(0)};
+}
+function end(){
+  const b=S.hints===0?'Principal Auditor':S.hints<4?'Senior Auditor':'Auditor';
+  draw(`<h2>You’re out. All five locks are open.</h2><p class="story">Badge earned: <strong>${b}</strong>. You used ${S.hints} hint${S.hints===1?'':'s'} and made ${S.tries} lock attempts.</p><section class="about" aria-labelledby="ab"><h3 id="ab">Built by K S Shoban</h3><p>This game has no timers, plays by keyboard alone and announces every result to screen readers. Contact: <a href="mailto:shoban212005@gmail.com">shoban212005@gmail.com</a></p></section><div class="row"><button class="ghost" id="again">Play again</button></div>`);
+  $('#again').onclick=intro;
+  say(`You escaped. Badge: ${b}.`,true);sfx.win();
+}
+intro();
+</script>
+</body>
+</html>
